@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'signup_screen.dart';
+import 'forgot_password_screen.dart';
+import 'home_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -9,23 +11,79 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  final _formKey = GlobalKey<FormState>();
+
   bool isObscure = true;
   bool rememberMe = false;
 
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+
+  @override
+  void dispose() {
+    emailController.dispose();
+    passwordController.dispose();
+    super.dispose();
+  }
+
+  // ---------------- LOGIN FUNCTION ----------------
+  void loginUser() {
+    FocusScope.of(context).unfocus();
+
+    if (_formKey.currentState!.validate()) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("Login Successful")));
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const HomeScreen()),
+      );
+    }
+  }
+
+  // ---------------- EMAIL VALIDATOR ----------------
+  String? validateEmail(String? value) {
+    if (value == null || value.isEmpty) {
+      return "Email is required";
+    }
+
+    final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w]{2,4}$');
+
+    if (!emailRegex.hasMatch(value)) {
+      return "Enter a valid email";
+    }
+    return null;
+  }
+
+  // ---------------- PASSWORD VALIDATOR ----------------
+  String? validatePassword(String? value) {
+    if (value == null || value.isEmpty) {
+      return "Password is required";
+    }
+    if (value.length < 6) {
+      return "Minimum 6 characters required";
+    }
+    return null;
+  }
+
+  // ---------------- UI ----------------
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF2F2F2),
+
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
+        child: Form(
+          key: _formKey,
           child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const SizedBox(height: 5),
+                const SizedBox(height: 15),
 
-                // Back Arrow and Title in Row
+                // TITLE
                 Row(
                   children: [
                     IconButton(
@@ -33,7 +91,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         Icons.arrow_back,
                         color: Color(0xFF5E60CE),
                       ),
-                      onPressed: () {},
+                      onPressed: () => Navigator.pop(context),
                     ),
                     const SizedBox(width: 8),
                     const Text(
@@ -47,57 +105,46 @@ class _LoginScreenState extends State<LoginScreen> {
                   ],
                 ),
 
-                const SizedBox(height: 15),
+                const SizedBox(height: 30),
 
-                // Email Label
-                const Text(
-                  "Email",
-                  style: TextStyle(color: Colors.grey, fontSize: 16),
-                ),
-
-                TextField(
+                // EMAIL FIELD
+                const Text("Email", style: TextStyle(color: Colors.grey)),
+                TextFormField(
+                  controller: emailController,
+                  validator: validateEmail,
+                  keyboardType: TextInputType.emailAddress,
                   decoration: const InputDecoration(
                     hintText: "email@email.com",
-                    hintStyle: TextStyle(color: Color(0xFF5E60CE)),
-                    enabledBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(color: Colors.grey),
-                    ),
+                    enabledBorder: UnderlineInputBorder(),
                   ),
                 ),
 
-                const SizedBox(height: 15),
+                const SizedBox(height: 25),
 
-                // Password Label
-                const Text(
-                  "Password",
-                  style: TextStyle(color: Colors.grey, fontSize: 16),
-                ),
-
-                TextField(
+                // PASSWORD FIELD
+                const Text("Password", style: TextStyle(color: Colors.grey)),
+                TextFormField(
+                  controller: passwordController,
+                  validator: validatePassword,
                   obscureText: isObscure,
                   decoration: InputDecoration(
-                    hintText: "password@123",
-                    hintStyle: const TextStyle(color: Color(0xFF5E60CE)),
-                    enabledBorder: const UnderlineInputBorder(
-                      borderSide: BorderSide(color: Colors.grey),
-                    ),
+                    hintText: "******",
+                    enabledBorder: const UnderlineInputBorder(),
                     suffixIcon: IconButton(
                       icon: Icon(
                         isObscure ? Icons.visibility_off : Icons.visibility,
                         color: Colors.grey,
                       ),
                       onPressed: () {
-                        setState(() {
-                          isObscure = !isObscure;
-                        });
+                        setState(() => isObscure = !isObscure);
                       },
                     ),
                   ),
                 ),
 
-                const SizedBox(height: 10),
+                const SizedBox(height: 15),
 
-                // Remember + Forgot
+                // REMEMBER + FORGOT
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -106,56 +153,67 @@ class _LoginScreenState extends State<LoginScreen> {
                         Switch(
                           value: rememberMe,
                           activeColor: const Color(0xFF5E60CE),
-                          onChanged: (value) {
-                            setState(() {
-                              rememberMe = value;
-                            });
-                          },
+                          onChanged: (value) =>
+                              setState(() => rememberMe = value),
                         ),
-                        const Text(
-                          "Remember Me",
-                          style: TextStyle(color: Colors.grey),
-                        ),
+                        const Text("Remember Me"),
                       ],
                     ),
-                    const Text(
-                      "Forgot Password?",
-                      style: TextStyle(color: Color(0xFF5E60CE)),
+
+                    TextButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const ForgotPasswordScreen(),
+                          ),
+                        );
+                      },
+                      child: const Text("Forgot Password?"),
                     ),
                   ],
                 ),
 
-                const SizedBox(height: 15),
+                const SizedBox(height: 20),
 
-                // Gradient Login Button
-                Container(
+                // LOGIN BUTTON
+                SizedBox(
                   width: double.infinity,
                   height: 55,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(30),
-                    gradient: const LinearGradient(
-                      colors: [Color(0xFF6A75F2), Color(0xFFE46BBE)],
+                  child: ElevatedButton(
+                    onPressed: loginUser,
+                    style: ElevatedButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                      padding: EdgeInsets.zero,
                     ),
-                  ),
-                  child: const Center(
-                    child: Text(
-                      "Login",
-                      style: TextStyle(color: Colors.white, fontSize: 18),
+                    child: Ink(
+                      decoration: const BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [Color(0xFF6A75F2), Color(0xFFE46BBE)],
+                        ),
+                        borderRadius: BorderRadius.all(Radius.circular(30)),
+                      ),
+                      child: const Center(
+                        child: Text(
+                          "Login",
+                          style: TextStyle(fontSize: 18, color: Colors.white),
+                        ),
+                      ),
                     ),
                   ),
                 ),
 
-                const SizedBox(height: 10),
+                const SizedBox(height: 20),
 
-                // Sign Up Text
+                // SIGNUP
                 Center(
-                  child: GestureDetector(
-                    onTap: () {
+                  child: TextButton(
+                    onPressed: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(
-                          builder: (context) => const SignupScreen(),
-                        ),
+                        MaterialPageRoute(builder: (_) => const SignupScreen()),
                       );
                     },
                     child: const Text.rich(
@@ -173,71 +231,18 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
 
-                const SizedBox(height: 15),
+                const SizedBox(height: 30),
 
-                // OR Divider
-                Row(
-                  children: const [
-                    Expanded(child: Divider(thickness: 1)),
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 10),
-                      child: Text("OR", style: TextStyle(color: Colors.grey)),
-                    ),
-                    Expanded(child: Divider(thickness: 1)),
-                  ],
-                ),
-
-                const SizedBox(height: 15),
-
-                // Social Buttons
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      child: Container(
-                        height: 50,
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF4267B2),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: const Center(
-                          child: Text(
-                            "Connect with FB",
-                            style: TextStyle(color: Colors.white),
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 15),
-                    Expanded(
-                      child: Container(
-                        height: 50,
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFDB4437),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: const Center(
-                          child: Text(
-                            "Connect with G+",
-                            style: TextStyle(color: Colors.white),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: 5),
-
-                // Bottom Image
+                // BOTTOM IMAGE
                 Align(
                   alignment: Alignment.bottomRight,
                   child: SizedBox(
-                    width: 262,
-                    height: 248,
-                    child: Image.asset("assets/bulb.png", fit: BoxFit.cover),
+                    width: 180,
+                    child: Image.asset("assets/bulb.png", fit: BoxFit.contain),
                   ),
                 ),
+
+                const SizedBox(height: 20),
               ],
             ),
           ),
