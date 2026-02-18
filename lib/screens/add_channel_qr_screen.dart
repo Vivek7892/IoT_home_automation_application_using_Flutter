@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'add_channel_screen.dart';
+import 'connecting_screen.dart';
 
 class AddChannelQRScreen extends StatefulWidget {
   const AddChannelQRScreen({super.key});
@@ -21,7 +21,7 @@ class _AddChannelQRScreenState extends State<AddChannelQRScreen> {
     super.dispose();
   }
 
-  /// NAVIGATE TO WIFI SETUP
+  /// COMPLETE SETUP AND GO TO CONNECTING SCREEN
   void goNext() {
     String channelName = channelNameController.text.trim();
 
@@ -32,14 +32,13 @@ class _AddChannelQRScreenState extends State<AddChannelQRScreen> {
       return;
     }
 
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text("$channelName added successfully")),
+    );
+
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) => AddChannelScreen(
-          channelName: channelName,
-          rememberWifi: rememberWifi,
-        ),
-      ),
+      MaterialPageRoute(builder: (context) => const ConnectingScreen()),
     );
   }
 
@@ -111,11 +110,7 @@ class _AddChannelQRScreenState extends State<AddChannelQRScreen> {
                   borderRadius: BorderRadius.circular(28),
                 ),
               ),
-              onPressed: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text("QR Scanner will open here")),
-                );
-              },
+              onPressed: goNext,
               child: const Text(
                 "Scan QR Code",
                 style: TextStyle(color: Color(0xFF6A75F2), fontSize: 18),
@@ -185,7 +180,7 @@ class _AddChannelQRScreenState extends State<AddChannelQRScreen> {
 
                 Switch(
                   value: rememberWifi,
-                  activeColor: const Color(0xFF5E60CE),
+                  activeThumbColor: const Color(0xFF5E60CE),
                   onChanged: (value) {
                     setState(() => rememberWifi = value);
                   },

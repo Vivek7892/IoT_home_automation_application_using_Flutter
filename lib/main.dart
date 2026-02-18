@@ -5,8 +5,9 @@ import 'screens/forgot_password_screen.dart';
 import 'screens/check_email_screen.dart';
 import 'screens/create_new_password_screen.dart';
 import 'screens/home_screen.dart';
+import 'screens/channel_home_screen.dart';
 import 'screens/add_channel_qr_screen.dart';
-import 'screens/add_channel_screen.dart';
+import 'screens/add_device_to_channel_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -27,7 +28,9 @@ class MyApp extends StatelessWidget {
         '/check-email': (context) => const CheckEmailScreen(),
         '/create-password': (context) => const CreateNewPasswordScreen(),
         '/home': (context) => const HomeScreen(),
+        '/channel-home': (context) => const ChannelHomeScreen(),
         '/add-channel-qr': (context) => const AddChannelQRScreen(),
+        '/add-device-to-channel': (context) => const AddDeviceToChannelScreen(),
       },
     );
   }

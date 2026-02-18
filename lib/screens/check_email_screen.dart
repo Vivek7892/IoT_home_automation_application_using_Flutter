@@ -62,7 +62,10 @@ class CheckEmailScreen extends StatelessWidget {
                           borderRadius: BorderRadius.circular(21),
                         ),
                       ),
-                      onPressed: () => Navigator.pop(context),
+                      onPressed: () => Navigator.pushReplacementNamed(
+                        context,
+                        '/create-password',
+                      ),
                       child: const Text(
                         "OK",
                         style: TextStyle(

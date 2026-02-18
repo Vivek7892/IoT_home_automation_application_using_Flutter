@@ -7,145 +7,357 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF2F2F2),
-
-      appBar: AppBar(
-        backgroundColor: const Color(0xFFF2F2F2),
-        elevation: 0,
-        centerTitle: true,
-        title: const Text(
-          "Home",
-          style: TextStyle(
-            color: Color(0xFF484B9A),
-            fontWeight: FontWeight.bold,
-            fontSize: 22,
-          ),
-        ),
-        actions: const [
-          Padding(
-            padding: EdgeInsets.only(right: 16),
-            child: Icon(Icons.notifications_none, color: Color(0xFF484B9A)),
-          ),
-        ],
-      ),
-
-      body: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+      body: SafeArea(
+        child: Stack(
           children: [
-            /// Greeting Card
-            Container(
-              padding: const EdgeInsets.all(18),
-              decoration: BoxDecoration(
-                color: const Color(0xFF4B4FA3),
-                borderRadius: BorderRadius.circular(18),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black26,
-                    blurRadius: 8,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: const Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(20, 14, 20, 120),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
+                  const SizedBox(height: 8),
+                  Row(
+                    children: const [
+                      Spacer(),
                       Text(
-                        "Good Morning!",
+                        "Home",
                         style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF4B4FA3),
+                          fontWeight: FontWeight.w700,
+                          fontSize: 22,
                         ),
                       ),
-                      SizedBox(height: 5),
-                      Text(
-                        "Vivek V",
-                        style: TextStyle(color: Colors.white70, fontSize: 16),
+                      Spacer(),
+                      Icon(
+                        Icons.notifications_none,
+                        color: Color(0xFF4B4FA3),
+                        size: 24,
                       ),
                     ],
                   ),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
+                  const SizedBox(height: 24),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 14,
+                    ),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF4B4FA3),
+                      borderRadius: BorderRadius.circular(18),
+                      boxShadow: const [
+                        BoxShadow(
+                          color: Color(0x26000000),
+                          blurRadius: 8,
+                          offset: Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: const Row(
+                      children: [
+                        CircleAvatar(
+                          radius: 24,
+                          backgroundColor: Colors.white24,
+                          child: Icon(
+                            Icons.person,
+                            color: Colors.white,
+                            size: 26,
+                          ),
+                        ),
+                        SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                "Good Morning!",
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                              SizedBox(height: 4),
+                              Text(
+                                "Vivek V",
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w400,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Text(
+                              "May 30",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 15,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                            SizedBox(height: 6),
+                            Text(
+                              "10:30 PM",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w400,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 30),
+                  Row(
                     children: [
-                      Text(
-                        "May 30",
-                        style: TextStyle(color: Colors.white, fontSize: 16),
+                      const Icon(
+                        Icons.square_rounded,
+                        color: Color(0xFF0A0F66),
+                        size: 18,
                       ),
-                      SizedBox(height: 5),
-                      Text(
-                        "10:30 PM",
-                        style: TextStyle(color: Colors.white70, fontSize: 14),
+                      const SizedBox(width: 8),
+                      const Text(
+                        "My Channels",
+                        style: TextStyle(
+                          color: Color(0xFF0A0F66),
+                          fontSize: 18,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      const Spacer(),
+                      OutlinedButton.icon(
+                        onPressed: () {},
+                        style: OutlinedButton.styleFrom(
+                          side: const BorderSide(
+                            color: Color(0xFF6C74F3),
+                            width: 2,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(18),
+                          ),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 8,
+                          ),
+                        ),
+                        iconAlignment: IconAlignment.end,
+                        icon: const Icon(
+                          Icons.arrow_forward,
+                          color: Color(0xFF6C74F3),
+                        ),
+                        label: const Text(
+                          "View All Channels",
+                          style: TextStyle(
+                            color: Color(0xFF6C74F3),
+                            fontSize: 12,
+                          ),
+                        ),
                       ),
                     ],
                   ),
+                  const SizedBox(height: 8),
+                  const Text(
+                    "List of existing channels",
+                    style: TextStyle(
+                      color: Color(0xFF888888),
+                      fontSize: 16,
+                      fontStyle: FontStyle.italic,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  InkWell(
+                    borderRadius: BorderRadius.circular(18),
+                    onTap: () {
+                      Navigator.pushNamed(context, '/channel-home');
+                    },
+                    child: Container(
+                      width: 156,
+                      height: 116,
+                      padding: const EdgeInsets.all(18),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFCFD0E6),
+                        borderRadius: BorderRadius.circular(18),
+                        boxShadow: const [
+                          BoxShadow(
+                            color: Color(0x1A000000),
+                            blurRadius: 8,
+                            offset: Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: const Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Icon(
+                            Icons.square_rounded,
+                            color: Color(0xFF4B4FA3),
+                            size: 18,
+                          ),
+                          Spacer(),
+                          Text(
+                            "Migro_CH1",
+                            style: TextStyle(
+                              color: Color(0xFF4B4FA3),
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          SizedBox(height: 5),
+                          Text(
+                            "3/4 Devices",
+                            style: TextStyle(
+                              color: Color(0xFFF08A2A),
+                              fontSize: 13,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 32),
+                  Row(
+                    children: [
+                      const Icon(
+                        Icons.power,
+                        color: Color(0xFF0A0F66),
+                        size: 18,
+                      ),
+                      const SizedBox(width: 8),
+                      const Text(
+                        "My Devices",
+                        style: TextStyle(
+                          color: Color(0xFF0A0F66),
+                          fontSize: 18,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      const Spacer(),
+                      OutlinedButton.icon(
+                        onPressed: () {},
+                        style: OutlinedButton.styleFrom(
+                          side: const BorderSide(
+                            color: Color(0xFF6C74F3),
+                            width: 2,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(18),
+                          ),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 8,
+                          ),
+                        ),
+                        iconAlignment: IconAlignment.end,
+                        icon: const Icon(
+                          Icons.arrow_forward,
+                          color: Color(0xFF6C74F3),
+                        ),
+                        label: const Text(
+                          "View All Devices",
+                          style: TextStyle(
+                            color: Color(0xFF6C74F3),
+                            fontSize: 12,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 18),
+                  const Text(
+                    "List of my electronic devices",
+                    style: TextStyle(
+                      color: Color(0xFF888888),
+                      fontSize: 16,
+                      fontStyle: FontStyle.italic,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  GridView.count(
+                    crossAxisCount: 2,
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    mainAxisSpacing: 12,
+                    crossAxisSpacing: 12,
+                    childAspectRatio: 156 / 127,
+                    children: [
+                      _buildHomeDeviceCard(
+                        name: "Light Bulb",
+                        channel: "Migro_CH1",
+                        plug: "Plug 1",
+                        icon: Icons.lightbulb_outline,
+                        switchColor: const Color(0xFF5ACB5A),
+                      ),
+                      _buildHomeDeviceCard(
+                        name: "Fan",
+                        channel: "Migro_CH1",
+                        plug: "Plug 2",
+                        icon: Icons.toys,
+                        switchColor: const Color(0xFFE86B6B),
+                      ),
+                      _buildHomeDeviceCard(
+                        name: "Desktop",
+                        channel: "Migro_CH1",
+                        plug: "Plug 3",
+                        icon: Icons.desktop_windows,
+                        switchColor: const Color(0xFFE86B6B),
+                      ),
+                      _buildHomeDeviceCard(
+                        name: "TV",
+                        channel: "Migro_CH1",
+                        plug: "Plug 4",
+                        icon: Icons.tv,
+                        switchColor: const Color(0xFF8E8E8E),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
                 ],
               ),
             ),
-
-            const SizedBox(height: 30),
-
-            /// My Channels Title
-            const Row(
-              children: [
-                Icon(Icons.square, color: Color(0xFF0C0C54), size: 14),
-                SizedBox(width: 10),
-                Text(
-                  "My Channels",
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF0C0C54),
-                  ),
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 30),
-
-            /// Description
-            const Center(
-              child: Text(
-                "There are no channels yet, please add a\nchannel & configure it to see the power of\nour system.",
-                textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.grey, fontSize: 16, height: 1.4),
-              ),
-            ),
-
-            const SizedBox(height: 40),
-
-            /// Image
-            Center(child: Image.asset("assets/home.png", height: 200)),
-
-            const SizedBox(height: 30),
-
-            /// Add Channels Button
-            Center(
-              child: OutlinedButton(
-                style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 40,
-                    vertical: 15,
-                  ),
-                  side: const BorderSide(color: Color(0xFF6A75F2), width: 2),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(25),
-                  ),
-                ),
-
-                onPressed: () {
-                  Navigator.pushNamed(context, '/add-channel-qr');
-                },
-
-                child: const Text(
-                  "Add Channels +",
-                  style: TextStyle(
-                    color: Color(0xFF6A75F2),
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: 12,
+              child: SafeArea(
+                top: false,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        _buildDockCircle(Icons.person),
+                        const SizedBox(width: 10),
+                        _buildDockCircle(Icons.nightlight_round),
+                        const SizedBox(width: 10),
+                        _buildDockCircle(Icons.square_rounded),
+                        const SizedBox(width: 10),
+                        _buildDockCircle(Icons.power),
+                        const SizedBox(width: 10),
+                        _buildDockCircle(Icons.meeting_room),
+                        const SizedBox(width: 12),
+                        Container(
+                          width: 40,
+                          height: 40,
+                          decoration: const BoxDecoration(
+                            color: Color(0xFFFF4A4A),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.close,
+                            color: Colors.white,
+                            size: 24,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -153,39 +365,111 @@ class HomeScreen extends StatelessWidget {
           ],
         ),
       ),
-
-      /// Floating Buttons
-      floatingActionButton: Row(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          buildCircle(Icons.nightlight_round),
-          const SizedBox(width: 12),
-          buildCircle(Icons.crop_square),
-          const SizedBox(width: 12),
-          buildCircle(Icons.power),
-          const SizedBox(width: 12),
-          buildCircle(Icons.meeting_room),
-          const SizedBox(width: 12),
-
-          FloatingActionButton(
-            backgroundColor: Colors.red,
-            onPressed: () {},
-            child: const Icon(Icons.close),
-          ),
-        ],
-      ),
     );
   }
 
-  Widget buildCircle(IconData icon) {
+  Widget _buildDockCircle(IconData icon) {
     return Container(
-      width: 45,
-      height: 45,
+      width: 28,
+      height: 28,
       decoration: const BoxDecoration(
         color: Color(0xFF0C0C54),
         shape: BoxShape.circle,
       ),
-      child: Icon(icon, color: Colors.white, size: 20),
+      child: Icon(icon, color: Colors.white, size: 14),
+    );
+  }
+
+  Widget _buildHomeDeviceCard({
+    required String name,
+    required String channel,
+    required String plug,
+    required IconData icon,
+    required Color switchColor,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF7F7F7),
+        borderRadius: BorderRadius.circular(18),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon, color: const Color(0xFF4B4FA3), size: 22),
+              const Spacer(),
+              Container(
+                width: 38,
+                height: 38,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.white,
+                  border: Border.all(color: switchColor, width: 2),
+                  boxShadow: const [
+                    BoxShadow(
+                      color: Color(0x22000000),
+                      blurRadius: 8,
+                      offset: Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Icon(
+                  Icons.power_settings_new,
+                  color: switchColor,
+                  size: 24,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            name,
+            style: const TextStyle(
+              color: Color(0xFF4B4FA3),
+              fontSize: 14,
+              fontWeight: FontWeight.w700,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: 6),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  channel,
+                  style: const TextStyle(
+                    color: Color(0xFF808080),
+                    fontSize: 11,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              const SizedBox(width: 6),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 2,
+                ),
+                decoration: BoxDecoration(
+                  border: Border.all(color: const Color(0xFFF08A2A), width: 2),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  plug,
+                  style: const TextStyle(
+                    color: Color(0xFFF08A2A),
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }
