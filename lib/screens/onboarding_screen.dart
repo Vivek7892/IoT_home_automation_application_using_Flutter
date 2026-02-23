@@ -5,32 +5,39 @@ class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
 
   @override
-  _OnboardingScreenState createState() => _OnboardingScreenState();
+  State<OnboardingScreen> createState() => _OnboardingScreenState();
 }
 
 class _OnboardingScreenState extends State<OnboardingScreen> {
-  PageController _controller = PageController();
+  final PageController _controller = PageController();
   int currentIndex = 0;
 
-  List<String> images = [
-    //"assets/connect.png",
-    //"assetts/control.png",
-    "assets/save.png",
+  final List<Map<String, dynamic>> pages = [
+    {
+      "image": "assets/connect.png",
+      "title": "CONNECT",
+      "desc": "Connect all your smart home\n"
+          "devices using easiest steps\n"
+          "and manage fast.",
+      "accent": const Color(0xFF8A6FEA),
+    },
+    {
+      "image": "assets/control.png",
+      "title": "CONTROL",
+      "desc": "Control your devices from home,\n"
+          "abroad or from anywhere in the\n"
+          "world and just relax.",
+      "accent": const Color(0xFFE86BC0),
+    },
+    {
+      "image": "assets/save.png",
+      "title": "SAVE",
+      "desc": "Create scenes as per your\n"
+          "mood and needs, just one click\n"
+          "and manage your home.",
+      "accent": const Color(0xFF6B79EA),
+    },
   ];
-
-  void nextPage() {
-    if (currentIndex < images.length - 1) {
-      _controller.nextPage(
-        duration: Duration(milliseconds: 300),
-        curve: Curves.ease,
-      );
-    } else {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const LoginScreen()),
-      );
-    }
-  }
 
   void skip() {
     Navigator.pushReplacement(
@@ -42,64 +49,93 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Stack(
-        children: [
-          PageView.builder(
-            controller: _controller,
-            itemCount: images.length,
-            onPageChanged: (index) {
-              setState(() {
-                currentIndex = index;
-              });
-            },
-            itemBuilder: (context, index) {
-              return Container(
-                padding: EdgeInsets.all(20),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Expanded(child: Image.asset(images[index])),
-                    SizedBox(height: 20),
-
-                    /// Dots indicator
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: List.generate(
-                        images.length,
-                        (dotIndex) => Container(
-                          margin: EdgeInsets.symmetric(horizontal: 4),
-                          width: currentIndex == dotIndex ? 12 : 8,
-                          height: currentIndex == dotIndex ? 12 : 8,
-                          decoration: BoxDecoration(
-                            color: currentIndex == dotIndex
-                                ? Colors.purple
-                                : Colors.grey,
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                      ),
+      backgroundColor: const Color(0xFFF2F2F2),
+      body: PageView.builder(
+        controller: _controller,
+        itemCount: pages.length,
+        onPageChanged: (index) {
+          setState(() {
+            currentIndex = index;
+          });
+        },
+        itemBuilder: (context, index) {
+          return Padding(
+            padding: const EdgeInsets.fromLTRB(22, 28, 22, 32),
+            child: Column(
+              children: [
+                Expanded(
+                  flex: 9,
+                  child: Center(
+                    child: Image.asset(
+                      pages[index]["image"] as String,
+                      fit: BoxFit.contain,
                     ),
-
-                    SizedBox(height: 20),
-
-                    ElevatedButton(
-                      onPressed: nextPage,
-                      child: Text(
-                        currentIndex == images.length - 1
-                            ? "Get Started"
-                            : "Next",
-                      ),
-                    ),
-
-                    TextButton(onPressed: skip, child: Text("Skip")),
-
-                    SizedBox(height: 40),
-                  ],
+                  ),
                 ),
-              );
-            },
-          ),
-        ],
+                Text(
+                  pages[index]["title"] as String,
+                  style: TextStyle(
+                    color: pages[index]["accent"] as Color,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 26 * 1.1,
+                    letterSpacing: 0.6,
+                  ),
+                ),
+                const SizedBox(height: 18),
+                Text(
+                  pages[index]["desc"] as String,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    color: Color(0xFF868686),
+                    fontSize: 19 * 1.1,
+                    height: 1.2,
+                  ),
+                ),
+                const SizedBox(height: 42),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: List.generate(
+                    pages.length,
+                    (dotIndex) => Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 8),
+                      width: 12,
+                      height: 12,
+                      decoration: BoxDecoration(
+                        color: currentIndex == dotIndex
+                            ? const Color(0xFF8A6FEA)
+                            : const Color(0xFFC4C4C4),
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 50),
+                SizedBox(
+                  width: 210,
+                  height: 56,
+                  child: OutlinedButton(
+                    onPressed: skip,
+                    style: OutlinedButton.styleFrom(
+                      side: const BorderSide(color: Color(0xFFE86BC0), width: 1.8),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                    ),
+                    child: const Text(
+                      "Skip",
+                      style: TextStyle(
+                        color: Color(0xFFE86BC0),
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 10),
+              ],
+            ),
+          );
+        },
       ),
     );
   }

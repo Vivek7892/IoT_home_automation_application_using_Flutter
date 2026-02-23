@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'connection_success_screen.dart';
 
 class ConnectingScreen extends StatefulWidget {
   const ConnectingScreen({super.key});
@@ -15,10 +14,7 @@ class _ConnectingScreenState extends State<ConnectingScreen> {
     super.initState();
     Timer(const Duration(seconds: 3), () {
       if (!mounted) return;
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const ConnectionSuccessScreen()),
-      );
+      Navigator.pushReplacementNamed(context, '/connection-success');
     });
   }
 

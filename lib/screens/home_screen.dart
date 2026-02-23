@@ -1,7 +1,46 @@
 import 'package:flutter/material.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  final List<Map<String, dynamic>> _devices = [
+    {
+      "name": "Light Bulb",
+      "channel": "Migro_CH1",
+      "plug": "Plug 1",
+      "icon": Icons.lightbulb_outline,
+      "isOn": true,
+    },
+    {
+      "name": "Fan",
+      "channel": "Migro_CH1",
+      "plug": "Plug 2",
+      "icon": Icons.toys,
+      "isOn": false,
+    },
+    {
+      "name": "Desktop",
+      "channel": "Migro_CH1",
+      "plug": "Plug 3",
+      "icon": Icons.desktop_windows,
+      "isOn": false,
+    },
+    {
+      "name": "TV",
+      "channel": "Migro_CH1",
+      "plug": "Plug 4",
+      "icon": Icons.tv,
+      "isOn": false,
+    },
+  ];
+
+  int get _activeDevices =>
+      _devices.where((device) => device["isOn"] as bool).length;
 
   @override
   Widget build(BuildContext context) {
@@ -132,7 +171,9 @@ class HomeScreen extends StatelessWidget {
                       ),
                       const Spacer(),
                       OutlinedButton.icon(
-                        onPressed: () {},
+                        onPressed: () {
+                          Navigator.pushNamed(context, '/my-channels');
+                        },
                         style: OutlinedButton.styleFrom(
                           side: const BorderSide(
                             color: Color(0xFF6C74F3),
@@ -191,16 +232,16 @@ class HomeScreen extends StatelessWidget {
                           ),
                         ],
                       ),
-                      child: const Column(
+                      child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Icon(
+                          const Icon(
                             Icons.square_rounded,
                             color: Color(0xFF4B4FA3),
                             size: 18,
                           ),
-                          Spacer(),
-                          Text(
+                          const Spacer(),
+                          const Text(
                             "Migro_CH1",
                             style: TextStyle(
                               color: Color(0xFF4B4FA3),
@@ -208,10 +249,10 @@ class HomeScreen extends StatelessWidget {
                               fontWeight: FontWeight.w700,
                             ),
                           ),
-                          SizedBox(height: 5),
+                          const SizedBox(height: 5),
                           Text(
-                            "3/4 Devices",
-                            style: TextStyle(
+                            "$_activeDevices/${_devices.length} Devices",
+                            style: const TextStyle(
                               color: Color(0xFFF08A2A),
                               fontSize: 13,
                             ),
@@ -239,7 +280,9 @@ class HomeScreen extends StatelessWidget {
                       ),
                       const Spacer(),
                       OutlinedButton.icon(
-                        onPressed: () {},
+                        onPressed: () {
+                          Navigator.pushNamed(context, '/channel-home');
+                        },
                         style: OutlinedButton.styleFrom(
                           side: const BorderSide(
                             color: Color(0xFF6C74F3),
@@ -286,34 +329,23 @@ class HomeScreen extends StatelessWidget {
                     crossAxisSpacing: 12,
                     childAspectRatio: 156 / 127,
                     children: [
-                      _buildHomeDeviceCard(
-                        name: "Light Bulb",
-                        channel: "Migro_CH1",
-                        plug: "Plug 1",
-                        icon: Icons.lightbulb_outline,
-                        switchColor: const Color(0xFF5ACB5A),
-                      ),
-                      _buildHomeDeviceCard(
-                        name: "Fan",
-                        channel: "Migro_CH1",
-                        plug: "Plug 2",
-                        icon: Icons.toys,
-                        switchColor: const Color(0xFFE86B6B),
-                      ),
-                      _buildHomeDeviceCard(
-                        name: "Desktop",
-                        channel: "Migro_CH1",
-                        plug: "Plug 3",
-                        icon: Icons.desktop_windows,
-                        switchColor: const Color(0xFFE86B6B),
-                      ),
-                      _buildHomeDeviceCard(
-                        name: "TV",
-                        channel: "Migro_CH1",
-                        plug: "Plug 4",
-                        icon: Icons.tv,
-                        switchColor: const Color(0xFF8E8E8E),
-                      ),
+                      ..._devices.asMap().entries.map((entry) {
+                        final index = entry.key;
+                        final device = entry.value;
+                        return _buildHomeDeviceCard(
+                          name: device["name"] as String,
+                          channel: device["channel"] as String,
+                          plug: device["plug"] as String,
+                          icon: device["icon"] as IconData,
+                          isOn: device["isOn"] as bool,
+                          onToggle: () {
+                            setState(() {
+                              _devices[index]["isOn"] =
+                                  !(_devices[index]["isOn"] as bool);
+                            });
+                          },
+                        );
+                      }),
                     ],
                   ),
                   const SizedBox(height: 20),
@@ -333,27 +365,66 @@ class HomeScreen extends StatelessWidget {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
-                        _buildDockCircle(Icons.person),
+                        _buildDockCircle(
+                          context,
+                          Icons.person,
+                          onTap: () {
+                            Navigator.pushNamed(context, '/profile');
+                          },
+                        ),
                         const SizedBox(width: 10),
-                        _buildDockCircle(Icons.nightlight_round),
+                        _buildDockCircle(
+                          context,
+                          Icons.nightlight_round,
+                          onTap: () {
+                            Navigator.pushNamed(context, '/mode-settings');
+                          },
+                        ),
                         const SizedBox(width: 10),
-                        _buildDockCircle(Icons.square_rounded),
+                        _buildDockCircle(
+                          context,
+                          Icons.square_rounded,
+                          onTap: () {
+                            Navigator.pushNamed(context, '/my-channels');
+                          },
+                        ),
                         const SizedBox(width: 10),
-                        _buildDockCircle(Icons.power),
+                        _buildDockCircle(
+                          context,
+                          Icons.power,
+                          onTap: () {
+                            Navigator.pushNamed(context, '/channel-home');
+                          },
+                        ),
                         const SizedBox(width: 10),
-                        _buildDockCircle(Icons.meeting_room),
+                        _buildDockCircle(
+                          context,
+                          Icons.meeting_room,
+                          onTap: () {
+                            Navigator.pushNamed(context, '/add-channel-qr');
+                          },
+                        ),
                         const SizedBox(width: 12),
-                        Container(
-                          width: 40,
-                          height: 40,
-                          decoration: const BoxDecoration(
-                            color: Color(0xFFFF4A4A),
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(
-                            Icons.close,
-                            color: Colors.white,
-                            size: 24,
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.pushNamedAndRemoveUntil(
+                              context,
+                              '/login',
+                              (route) => false,
+                            );
+                          },
+                          child: Container(
+                            width: 40,
+                            height: 40,
+                            decoration: const BoxDecoration(
+                              color: Color(0xFFFF4A4A),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.close,
+                              color: Colors.white,
+                              size: 24,
+                            ),
                           ),
                         ),
                       ],
@@ -368,15 +439,22 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildDockCircle(IconData icon) {
-    return Container(
-      width: 28,
-      height: 28,
-      decoration: const BoxDecoration(
-        color: Color(0xFF0C0C54),
-        shape: BoxShape.circle,
+  Widget _buildDockCircle(
+    BuildContext context,
+    IconData icon, {
+    VoidCallback? onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 28,
+        height: 28,
+        decoration: const BoxDecoration(
+          color: Color(0xFF0C0C54),
+          shape: BoxShape.circle,
+        ),
+        child: Icon(icon, color: Colors.white, size: 14),
       ),
-      child: Icon(icon, color: Colors.white, size: 14),
     );
   }
 
@@ -385,8 +463,12 @@ class HomeScreen extends StatelessWidget {
     required String channel,
     required String plug,
     required IconData icon,
-    required Color switchColor,
+    required bool isOn,
+    required VoidCallback onToggle,
   }) {
+    final Color switchColor = isOn
+        ? const Color(0xFF5ACB5A)
+        : const Color(0xFFE86B6B);
     return Container(
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
@@ -400,25 +482,29 @@ class HomeScreen extends StatelessWidget {
             children: [
               Icon(icon, color: const Color(0xFF4B4FA3), size: 22),
               const Spacer(),
-              Container(
-                width: 38,
-                height: 38,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Colors.white,
-                  border: Border.all(color: switchColor, width: 2),
-                  boxShadow: const [
-                    BoxShadow(
-                      color: Color(0x22000000),
-                      blurRadius: 8,
-                      offset: Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: Icon(
-                  Icons.power_settings_new,
-                  color: switchColor,
-                  size: 24,
+              GestureDetector(
+                onTap: onToggle,
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 180),
+                  width: 38,
+                  height: 38,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.white,
+                    border: Border.all(color: switchColor, width: 2),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: Color(0x22000000),
+                        blurRadius: 8,
+                        offset: Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Icon(
+                    Icons.power_settings_new,
+                    color: switchColor,
+                    size: 24,
+                  ),
                 ),
               ),
             ],

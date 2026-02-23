@@ -8,6 +8,14 @@ import 'screens/home_screen.dart';
 import 'screens/channel_home_screen.dart';
 import 'screens/add_channel_qr_screen.dart';
 import 'screens/add_device_to_channel_screen.dart';
+import 'screens/signup_screen.dart';
+import 'screens/connecting_screen.dart';
+import 'screens/connection_success_screen.dart';
+import 'screens/my_channels_screen.dart';
+import 'screens/manage_scene_screen.dart';
+import 'screens/mode_settings_screen.dart';
+import 'screens/profile_screen.dart';
+import 'screens/my_scenes_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -20,10 +28,18 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
+      builder: (context, child) {
+        final media = MediaQuery.of(context);
+        return MediaQuery(
+          data: media.copyWith(textScaler: const TextScaler.linear(1.0)),
+          child: child ?? const SizedBox.shrink(),
+        );
+      },
       home: const OnboardingScreen(),
 
       routes: {
         '/login': (context) => const LoginScreen(),
+        '/signup': (context) => const SignupScreen(),
         '/forgot': (context) => const ForgotPasswordScreen(),
         '/check-email': (context) => const CheckEmailScreen(),
         '/create-password': (context) => const CreateNewPasswordScreen(),
@@ -31,6 +47,13 @@ class MyApp extends StatelessWidget {
         '/channel-home': (context) => const ChannelHomeScreen(),
         '/add-channel-qr': (context) => const AddChannelQRScreen(),
         '/add-device-to-channel': (context) => const AddDeviceToChannelScreen(),
+        '/connecting': (context) => const ConnectingScreen(),
+        '/connection-success': (context) => const ConnectionSuccessScreen(),
+        '/my-channels': (context) => const MyChannelsScreen(),
+        '/manage-scene': (context) => const ManageSceneScreen(),
+        '/my-scenes': (context) => const MyScenesScreen(),
+        '/mode-settings': (context) => const ModeSettingsScreen(),
+        '/profile': (context) => const ProfileScreen(),
       },
     );
   }

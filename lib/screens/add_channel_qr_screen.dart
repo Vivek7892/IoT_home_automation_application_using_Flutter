@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'connecting_screen.dart';
-
+import 'add_channel_screen.dart';
 class AddChannelQRScreen extends StatefulWidget {
   const AddChannelQRScreen({super.key});
 
@@ -21,7 +20,7 @@ class _AddChannelQRScreenState extends State<AddChannelQRScreen> {
     super.dispose();
   }
 
-  /// COMPLETE SETUP AND GO TO CONNECTING SCREEN
+  /// COMPLETE BASIC INFO AND GO TO CHANNEL CONFIG SCREEN
   void goNext() {
     String channelName = channelNameController.text.trim();
 
@@ -32,13 +31,14 @@ class _AddChannelQRScreenState extends State<AddChannelQRScreen> {
       return;
     }
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text("$channelName added successfully")),
-    );
-
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => const ConnectingScreen()),
+      MaterialPageRoute(
+        builder: (_) => AddChannelScreen(
+          channelName: channelName,
+          rememberWifi: rememberWifi,
+        ),
+      ),
     );
   }
 

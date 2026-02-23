@@ -145,19 +145,31 @@ class _SignupScreenState extends State<SignupScreen> {
                 const SizedBox(height: 8),
 
                 // Sign Up Button
-                Container(
-                  width: double.infinity,
-                  height: 50,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(30),
-                    gradient: const LinearGradient(
-                      colors: [Color(0xFF6A75F2), Color(0xFFE46BBE)],
+                GestureDetector(
+                  onTap: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text("Account created")),
+                    );
+                    Navigator.pushNamedAndRemoveUntil(
+                      context,
+                      '/login',
+                      (route) => false,
+                    );
+                  },
+                  child: Container(
+                    width: double.infinity,
+                    height: 50,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(30),
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFF6A75F2), Color(0xFFE46BBE)],
+                      ),
                     ),
-                  ),
-                  child: const Center(
-                    child: Text(
-                      "Sign Up",
-                      style: TextStyle(color: Colors.white, fontSize: 16),
+                    child: const Center(
+                      child: Text(
+                        "Sign Up",
+                        style: TextStyle(color: Colors.white, fontSize: 16),
+                      ),
                     ),
                   ),
                 ),
@@ -206,32 +218,56 @@ class _SignupScreenState extends State<SignupScreen> {
                 Row(
                   children: [
                     Expanded(
-                      child: Container(
-                        height: 45,
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF4267B2),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: const Center(
-                          child: Text(
-                            "Connect with FB",
-                            style: TextStyle(color: Colors.white, fontSize: 12),
+                      child: GestureDetector(
+                        onTap: () {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text("Facebook login coming soon"),
+                            ),
+                          );
+                        },
+                        child: Container(
+                          height: 45,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF4267B2),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: const Center(
+                            child: Text(
+                              "Connect with FB",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 12,
+                              ),
+                            ),
                           ),
                         ),
                       ),
                     ),
                     const SizedBox(width: 10),
                     Expanded(
-                      child: Container(
-                        height: 45,
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFDB4437),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: const Center(
-                          child: Text(
-                            "Connect with G+",
-                            style: TextStyle(color: Colors.white, fontSize: 12),
+                      child: GestureDetector(
+                        onTap: () {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text("Google login coming soon"),
+                            ),
+                          );
+                        },
+                        child: Container(
+                          height: 45,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFDB4437),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: const Center(
+                            child: Text(
+                              "Connect with G+",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 12,
+                              ),
+                            ),
                           ),
                         ),
                       ),

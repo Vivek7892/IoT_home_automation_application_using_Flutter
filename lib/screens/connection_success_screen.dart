@@ -71,26 +71,36 @@ class ConnectionSuccessScreen extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 30),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: const [
-                  Row(
-                    children: [
-                      Icon(Icons.add, color: Color(0xFF6C7AE0)),
-                      SizedBox(width: 5),
-                      Text(
-                        "Add more channels",
-                        style: TextStyle(color: Color(0xFF6C7AE0)),
-                      ),
-                    ],
+                children: [
+                  InkWell(
+                    onTap: () {
+                      Navigator.pushNamed(context, '/add-channel-qr');
+                    },
+                    child: Row(
+                      children: [
+                        const Icon(Icons.add, color: Color(0xFF6C7AE0)),
+                        const SizedBox(width: 5),
+                        const Text(
+                          "Add more channels",
+                          style: TextStyle(color: Color(0xFF6C7AE0)),
+                        ),
+                      ],
+                    ),
                   ),
-                  Row(
-                    children: [
-                      Icon(Icons.add, color: Color(0xFF6C7AE0)),
-                      SizedBox(width: 5),
-                      Text(
-                        "Add devices",
-                        style: TextStyle(color: Color(0xFF6C7AE0)),
-                      ),
-                    ],
+                  InkWell(
+                    onTap: () {
+                      Navigator.pushNamed(context, '/add-device-to-channel');
+                    },
+                    child: Row(
+                      children: [
+                        Icon(Icons.add, color: Color(0xFF6C7AE0)),
+                        SizedBox(width: 5),
+                        Text(
+                          "Add devices",
+                          style: TextStyle(color: Color(0xFF6C7AE0)),
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),

@@ -15,6 +15,11 @@ class _AddDeviceToChannelScreenState extends State<AddDeviceToChannelScreen> {
 
   String _selectedChannel = "Migro_CH1";
   String _selectedPlug = "1";
+  final List<Map<String, dynamic>> _devices = [
+    {"name": "Fan", "plug": "Plug 1", "icon": Icons.toys},
+    {"name": "Desktop", "plug": "Plug 2", "icon": Icons.desktop_windows},
+    {"name": "TV", "plug": "Plug 3", "icon": Icons.tv},
+  ];
 
   @override
   void dispose() {
@@ -59,7 +64,7 @@ class _AddDeviceToChannelScreenState extends State<AddDeviceToChannelScreen> {
                       onPressed: () {
                         Navigator.pushNamedAndRemoveUntil(
                           context,
-                          '/home',
+                          '/channel-home',
                           (route) => false,
                         );
                       },
@@ -195,6 +200,38 @@ class _AddDeviceToChannelScreenState extends State<AddDeviceToChannelScreen> {
                     ),
                     child: ElevatedButton(
                       onPressed: () {
+                        final name = _deviceNameController.text.trim();
+                        if (name.isEmpty) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text("Please provide device name"),
+                            ),
+                          );
+                          return;
+                        }
+
+                        final plugLabel = "Plug $_selectedPlug";
+                        final alreadyExists = _devices.any(
+                          (device) => device["plug"] == plugLabel,
+                        );
+                        if (alreadyExists) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                "$plugLabel is already assigned in $_selectedChannel",
+                              ),
+                            ),
+                          );
+                          return;
+                        }
+
+                        setState(() {
+                          _devices.add({
+                            "name": name,
+                            "plug": plugLabel,
+                            "icon": Icons.memory,
+                          });
+                        });
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(content: Text("Device saved")),
                         );
@@ -251,11 +288,19 @@ class _AddDeviceToChannelScreenState extends State<AddDeviceToChannelScreen> {
 
                 const SizedBox(height: 16),
 
-                _buildDeviceCard("Fan", "Plug 1", Icons.toys),
-                const SizedBox(height: 12),
-                _buildDeviceCard("Desktop", "Plug 2", Icons.desktop_windows),
-                const SizedBox(height: 12),
-                _buildDeviceCard("TV", "Plug 3", Icons.tv),
+                ..._devices.asMap().entries.map((entry) {
+                  final device = entry.value;
+                  return Padding(
+                    padding: EdgeInsets.only(
+                      bottom: entry.key == _devices.length - 1 ? 0 : 12,
+                    ),
+                    child: _buildDeviceCard(
+                      device["name"] as String,
+                      device["plug"] as String,
+                      device["icon"] as IconData,
+                    ),
+                  );
+                }),
 
                 const SizedBox(height: 80),
               ],

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'home_screen.dart';
+import '../constants/channel_store.dart';
 
 class AddChannelScreen extends StatefulWidget {
   final String channelName;
@@ -43,17 +43,20 @@ class _AddChannelScreenState extends State<AddChannelScreen> {
       return;
     }
 
+    ChannelStore.instance.addChannel(name: widget.channelName);
+
     /// SUCCESS MESSAGE
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text("${widget.channelName} configured successfully")),
+      SnackBar(content: Text("${widget.channelName} added successfully")),
     );
 
-    /// GO BACK TO HOME
+    /// GO TO CHANNELS LIST
     Future.delayed(const Duration(seconds: 1), () {
-      Navigator.pushAndRemoveUntil(
+      if (!mounted) return;
+      Navigator.pushNamedAndRemoveUntil(
         context,
-        MaterialPageRoute(builder: (context) => const HomeScreen()),
-        (route) => false,
+        '/my-channels',
+        (route) => route.settings.name == '/home',
       );
     });
   }
