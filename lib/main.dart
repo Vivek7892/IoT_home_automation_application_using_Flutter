@@ -1,59 +1,70 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'screens/onboarding_screen.dart';
 import 'screens/login_screen.dart';
-import 'screens/forgot_password_screen.dart';
-import 'screens/check_email_screen.dart';
-import 'screens/create_new_password_screen.dart';
-import 'screens/home_screen.dart';
-import 'screens/channel_home_screen.dart';
-import 'screens/add_channel_qr_screen.dart';
-import 'screens/add_device_to_channel_screen.dart';
 import 'screens/signup_screen.dart';
-import 'screens/connecting_screen.dart';
-import 'screens/connection_success_screen.dart';
+import 'screens/forgot_password_screen.dart';
+import 'screens/home_screen.dart';
 import 'screens/my_channels_screen.dart';
-import 'screens/manage_scene_screen.dart';
-import 'screens/mode_settings_screen.dart';
-import 'screens/profile_screen.dart';
+import 'screens/channel_home_screen.dart';
+import 'screens/add_device_to_channel_screen.dart';
+import 'screens/my_devices_screen.dart';
 import 'screens/my_scenes_screen.dart';
+import 'screens/manage_scene_screen.dart';
+import 'screens/users_screen.dart';
+import 'screens/user_permissions_screen.dart';
+import 'screens/my_account_screen.dart';
 
 void main() {
-  runApp(const MyApp());
+  WidgetsFlutterBinding.ensureInitialized();
+  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+  runApp(const IoTApp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class IoTApp extends StatelessWidget {
+  const IoTApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      title: 'Migro Home',
       debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        fontFamily: 'Roboto',
+        scaffoldBackgroundColor: const Color(0xFFF2F2F2),
+        colorScheme: const ColorScheme.light(
+          primary: Color(0xFF5E60CE),
+        ),
+      ),
       builder: (context, child) {
-        final media = MediaQuery.of(context);
         return MediaQuery(
-          data: media.copyWith(textScaler: const TextScaler.linear(1.0)),
+          data: MediaQuery.of(context).copyWith(textScaler: const TextScaler.linear(1.0)),
           child: child ?? const SizedBox.shrink(),
         );
       },
       home: const OnboardingScreen(),
-
       routes: {
-        '/login': (context) => const LoginScreen(),
-        '/signup': (context) => const SignupScreen(),
-        '/forgot': (context) => const ForgotPasswordScreen(),
-        '/check-email': (context) => const CheckEmailScreen(),
-        '/create-password': (context) => const CreateNewPasswordScreen(),
-        '/home': (context) => const HomeScreen(),
-        '/channel-home': (context) => const ChannelHomeScreen(),
-        '/add-channel-qr': (context) => const AddChannelQRScreen(),
-        '/add-device-to-channel': (context) => const AddDeviceToChannelScreen(),
-        '/connecting': (context) => const ConnectingScreen(),
-        '/connection-success': (context) => const ConnectionSuccessScreen(),
-        '/my-channels': (context) => const MyChannelsScreen(),
-        '/manage-scene': (context) => const ManageSceneScreen(),
-        '/my-scenes': (context) => const MyScenesScreen(),
-        '/mode-settings': (context) => const ModeSettingsScreen(),
-        '/profile': (context) => const ProfileScreen(),
+        '/onboarding': (_) => const OnboardingScreen(),
+        '/login': (_) => const LoginScreen(),
+        '/signup': (_) => const SignupScreen(),
+        '/forgot': (_) => const ForgotPasswordScreen(),
+        '/check-email': (_) => const CheckEmailScreen(),
+        '/create-password': (_) => const CreateNewPasswordScreen(),
+        '/home': (_) => const HomeScreen(),
+        '/my-channels': (_) => const MyChannelsScreen(),
+        '/channel-home': (_) => const ChannelHomeScreen(),
+        '/add-channel-qr': (_) => const AddChannelQRScreen(),
+        '/add-channel-wifi': (_) => const AddChannelWifiScreen(),
+        '/connecting': (_) => const ConnectingScreen(),
+        '/connection-success': (_) => const ConnectionSuccessScreen(),
+        '/connection-failed': (_) => const ConnectionFailedScreen(),
+        '/add-device': (_) => const AddDeviceToChannelScreen(),
+        '/my-devices': (_) => const MyDevicesScreen(),
+        '/my-scenes': (_) => const MyScenesScreen(),
+        '/manage-scene': (_) => const ManageSceneScreen(),
+        '/users': (_) => const UsersScreen(),
+        '/user-permissions': (_) => const UserPermissionsScreen(),
+        '/my-account': (_) => const MyAccountScreen(),
       },
     );
   }

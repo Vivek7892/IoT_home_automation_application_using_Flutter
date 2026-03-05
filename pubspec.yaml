@@ -1,44 +1,24 @@
-name: home_automation_iot
-description: Home Automation IoT Flutter App
-publish_to: 'none'
+name: iot_home_automation
+description: IoT Home Automation App
 
+publish_to: 'none'
 version: 1.0.0+1
 
 environment:
-  sdk: ">=3.3.0 <4.0.0"
+  sdk: '>=3.0.0 <4.0.0'
 
-# -------------------- DEPENDENCIES --------------------
 dependencies:
   flutter:
     sdk: flutter
+  cupertino_icons: ^1.0.6
 
-  cupertino_icons: ^1.0.8
-
-# -------------------- DEV DEPENDENCIES --------------------
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  flutter_lints: ^3.0.0
 
-  flutter_lints: ^6.0.0
-
-  # IMPORTANT (for app icon)
-  flutter_launcher_icons: ^0.13.1
-
-
-# -------------------- APP ICON CONFIG --------------------
-flutter_launcher_icons:
-  android: true
-  ios: true
-  image_path: "assets/logo.png"
-
-  # (optional but recommended modern icon)
-  adaptive_icon_background: "#ffffff"
-  adaptive_icon_foreground: "assets/logo.png"
-
-
-# -------------------- FLUTTER --------------------
 flutter:
   uses-material-design: true
-
   assets:
     - assets/
+    - assets/logo.png

@@ -1,561 +1,261 @@
 import 'package:flutter/material.dart';
+import '../constants/app_constants.dart';
+import '../models/app_store.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
-
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final List<Map<String, dynamic>> _devices = [
-    {
-      "name": "Light Bulb",
-      "channel": "Migro_CH1",
-      "plug": "Plug 1",
-      "icon": Icons.lightbulb_outline,
-      "isOn": true,
-    },
-    {
-      "name": "Fan",
-      "channel": "Migro_CH1",
-      "plug": "Plug 2",
-      "icon": Icons.toys,
-      "isOn": false,
-    },
-    {
-      "name": "Desktop",
-      "channel": "Migro_CH1",
-      "plug": "Plug 3",
-      "icon": Icons.desktop_windows,
-      "isOn": false,
-    },
-    {
-      "name": "TV",
-      "channel": "Migro_CH1",
-      "plug": "Plug 4",
-      "icon": Icons.tv,
-      "isOn": false,
-    },
-  ];
-
-  int get _activeDevices =>
-      _devices.where((device) => device["isOn"] as bool).length;
+  final _store = AppStore.instance;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF2F2F2),
+      backgroundColor: AppColors.background,
       body: SafeArea(
-        child: Stack(
-          children: [
-            SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(20, 14, 20, 120),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 8),
-                  Row(
-                    children: const [
-                      Spacer(),
-                      Text(
-                        "Home",
-                        style: TextStyle(
-                          color: Color(0xFF4B4FA3),
-                          fontWeight: FontWeight.w700,
-                          fontSize: 22,
-                        ),
-                      ),
-                      Spacer(),
-                      Icon(
-                        Icons.notifications_none,
-                        color: Color(0xFF4B4FA3),
-                        size: 24,
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 24),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 14,
-                    ),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF4B4FA3),
-                      borderRadius: BorderRadius.circular(18),
-                      boxShadow: const [
-                        BoxShadow(
-                          color: Color(0x26000000),
-                          blurRadius: 8,
-                          offset: Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: const Row(
-                      children: [
-                        CircleAvatar(
-                          radius: 24,
-                          backgroundColor: Colors.white24,
-                          child: Icon(
-                            Icons.person,
-                            color: Colors.white,
-                            size: 26,
-                          ),
-                        ),
-                        SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                "Good Morning!",
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                              SizedBox(height: 4),
-                              Text(
-                                "Vivek V",
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w400,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            Text(
-                              "May 30",
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 15,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                            SizedBox(height: 6),
-                            Text(
-                              "10:30 PM",
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 14,
-                                fontWeight: FontWeight.w400,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 30),
-                  Row(
-                    children: [
-                      const Icon(
-                        Icons.square_rounded,
-                        color: Color(0xFF0A0F66),
-                        size: 18,
-                      ),
-                      const SizedBox(width: 8),
-                      const Text(
-                        "My Channels",
-                        style: TextStyle(
-                          color: Color(0xFF0A0F66),
-                          fontSize: 18,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
+        child: ValueListenableBuilder<List<ChannelItem>>(
+          valueListenable: _store.channels,
+          builder: (context, channels, _) {
+            final allDevices = _store.allDevices;
+            final scenes = _store.scenes.value;
+
+            return Stack(
+              children: [
+                SingleChildScrollView(
+                  padding: const EdgeInsets.fromLTRB(18, 12, 18, 110),
+                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                    // ── Top bar
+                    Row(children: [
                       const Spacer(),
-                      OutlinedButton.icon(
-                        onPressed: () {
-                          Navigator.pushNamed(context, '/my-channels');
-                        },
-                        style: OutlinedButton.styleFrom(
-                          side: const BorderSide(
-                            color: Color(0xFF6C74F3),
-                            width: 2,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(18),
-                          ),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 14,
-                            vertical: 8,
-                          ),
-                        ),
-                        iconAlignment: IconAlignment.end,
-                        icon: const Icon(
-                          Icons.arrow_forward,
-                          color: Color(0xFF6C74F3),
-                        ),
-                        label: const Text(
-                          "View All Channels",
-                          style: TextStyle(
-                            color: Color(0xFF6C74F3),
-                            fontSize: 12,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  const Text(
-                    "List of existing channels",
-                    style: TextStyle(
-                      color: Color(0xFF888888),
-                      fontSize: 16,
-                      fontStyle: FontStyle.italic,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  InkWell(
-                    borderRadius: BorderRadius.circular(18),
-                    onTap: () {
-                      Navigator.pushNamed(context, '/channel-home');
-                    },
-                    child: Container(
-                      width: 156,
-                      height: 116,
-                      padding: const EdgeInsets.all(18),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFCFD0E6),
-                        borderRadius: BorderRadius.circular(18),
-                        boxShadow: const [
-                          BoxShadow(
-                            color: Color(0x1A000000),
-                            blurRadius: 8,
-                            offset: Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Icon(
-                            Icons.square_rounded,
-                            color: Color(0xFF4B4FA3),
-                            size: 18,
-                          ),
-                          const Spacer(),
-                          const Text(
-                            "Migro_CH1",
-                            style: TextStyle(
-                              color: Color(0xFF4B4FA3),
-                              fontSize: 16,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                          const SizedBox(height: 5),
-                          Text(
-                            "$_activeDevices/${_devices.length} Devices",
-                            style: const TextStyle(
-                              color: Color(0xFFF08A2A),
-                              fontSize: 13,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 32),
-                  Row(
-                    children: [
-                      const Icon(
-                        Icons.power,
-                        color: Color(0xFF0A0F66),
-                        size: 18,
-                      ),
-                      const SizedBox(width: 8),
-                      const Text(
-                        "My Devices",
-                        style: TextStyle(
-                          color: Color(0xFF0A0F66),
-                          fontSize: 18,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
+                      const Text('Home', style: TextStyle(color: AppColors.primaryMid, fontSize: 20, fontWeight: FontWeight.w700)),
                       const Spacer(),
-                      OutlinedButton.icon(
-                        onPressed: () {
-                          Navigator.pushNamed(context, '/channel-home');
-                        },
-                        style: OutlinedButton.styleFrom(
-                          side: const BorderSide(
-                            color: Color(0xFF6C74F3),
-                            width: 2,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(18),
-                          ),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 14,
-                            vertical: 8,
-                          ),
-                        ),
-                        iconAlignment: IconAlignment.end,
-                        icon: const Icon(
-                          Icons.arrow_forward,
-                          color: Color(0xFF6C74F3),
-                        ),
-                        label: const Text(
-                          "View All Devices",
-                          style: TextStyle(
-                            color: Color(0xFF6C74F3),
-                            fontSize: 12,
-                          ),
+                      const Icon(Icons.notifications_none, color: AppColors.primaryMid, size: 26),
+                    ]),
+                    const SizedBox(height: 16),
+                    // ── Greeting card
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+                      decoration: BoxDecoration(color: AppColors.primaryMid, borderRadius: BorderRadius.circular(18), boxShadow: const [BoxShadow(color: Color(0x26000000), blurRadius: 8, offset: Offset(0, 4))]),
+                      child: const Row(children: [
+                        Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                          Text('Good Morning!', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w700)),
+                          SizedBox(height: 4),
+                          Text('Nitin', style: TextStyle(color: Colors.white, fontSize: 14)),
+                        ])),
+                        Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
+                          Text('May 30', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w700)),
+                          SizedBox(height: 4),
+                          Text('10:30 PM', style: TextStyle(color: Colors.white, fontSize: 14)),
+                        ]),
+                      ]),
+                    ),
+                    const SizedBox(height: 24),
+
+                    // ── My Channels section
+                    _sectionHeader('My Channels', 'View All Channels', () => Navigator.pushNamed(context, '/my-channels'), icon: Icons.grid_view_rounded),
+                    const Text('List of existing channels', style: TextStyle(color: AppColors.textLight, fontSize: 12, fontStyle: FontStyle.italic)),
+                    const SizedBox(height: 12),
+                    if (channels.isEmpty)
+                      _emptyState('There are no channels yet, please add a channel & configure it.', Icons.add_box_outlined,
+                          'Add Channels', () => Navigator.pushNamed(context, '/add-channel-qr'))
+                    else
+                      SizedBox(
+                        height: 120,
+                        child: ListView.separated(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: channels.length,
+                          separatorBuilder: (_, __) => const SizedBox(width: 12),
+                          itemBuilder: (_, i) => _channelChip(channels[i], i),
                         ),
                       ),
-                    ],
-                  ),
-                  const SizedBox(height: 18),
-                  const Text(
-                    "List of my electronic devices",
-                    style: TextStyle(
-                      color: Color(0xFF888888),
-                      fontSize: 16,
-                      fontStyle: FontStyle.italic,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  GridView.count(
-                    crossAxisCount: 2,
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    mainAxisSpacing: 12,
-                    crossAxisSpacing: 12,
-                    childAspectRatio: 156 / 127,
-                    children: [
-                      ..._devices.asMap().entries.map((entry) {
-                        final index = entry.key;
-                        final device = entry.value;
-                        return _buildHomeDeviceCard(
-                          name: device["name"] as String,
-                          channel: device["channel"] as String,
-                          plug: device["plug"] as String,
-                          icon: device["icon"] as IconData,
-                          isOn: device["isOn"] as bool,
-                          onToggle: () {
-                            setState(() {
-                              _devices[index]["isOn"] =
-                                  !(_devices[index]["isOn"] as bool);
-                            });
-                          },
-                        );
-                      }),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
-                ],
-              ),
-            ),
-            Positioned(
-              left: 0,
-              right: 0,
-              bottom: 12,
-              child: SafeArea(
-                top: false,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
-                  child: FittedBox(
-                    fit: BoxFit.scaleDown,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        _buildDockCircle(
-                          context,
-                          Icons.person,
-                          onTap: () {
-                            Navigator.pushNamed(context, '/profile');
-                          },
-                        ),
-                        const SizedBox(width: 10),
-                        _buildDockCircle(
-                          context,
-                          Icons.nightlight_round,
-                          onTap: () {
-                            Navigator.pushNamed(context, '/mode-settings');
-                          },
-                        ),
-                        const SizedBox(width: 10),
-                        _buildDockCircle(
-                          context,
-                          Icons.square_rounded,
-                          onTap: () {
-                            Navigator.pushNamed(context, '/my-channels');
-                          },
-                        ),
-                        const SizedBox(width: 10),
-                        _buildDockCircle(
-                          context,
-                          Icons.power,
-                          onTap: () {
-                            Navigator.pushNamed(context, '/channel-home');
-                          },
-                        ),
-                        const SizedBox(width: 10),
-                        _buildDockCircle(
-                          context,
-                          Icons.meeting_room,
-                          onTap: () {
-                            Navigator.pushNamed(context, '/add-channel-qr');
-                          },
-                        ),
-                        const SizedBox(width: 12),
-                        GestureDetector(
-                          onTap: () {
-                            Navigator.pushNamedAndRemoveUntil(
-                              context,
-                              '/login',
-                              (route) => false,
-                            );
-                          },
-                          child: Container(
-                            width: 40,
-                            height: 40,
-                            decoration: const BoxDecoration(
-                              color: Color(0xFFFF4A4A),
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Icon(
-                              Icons.close,
-                              color: Colors.white,
-                              size: 24,
-                            ),
+                    const SizedBox(height: 24),
+
+                    // ── My Devices section
+                    _sectionHeader('My Devices', 'View All Devices', () => Navigator.pushNamed(context, '/my-devices'), icon: Icons.power_outlined),
+                    const Text('List of my electronic devices', style: TextStyle(color: AppColors.textLight, fontSize: 12, fontStyle: FontStyle.italic)),
+                    const SizedBox(height: 12),
+                    if (allDevices.isEmpty)
+                      _emptyState('There are No devices added yet, please add a device to the channel.', Icons.devices_other,
+                          'Add Devices', () => Navigator.pushNamed(context, '/add-device'))
+                    else
+                      GridView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2, mainAxisSpacing: 12, crossAxisSpacing: 12, childAspectRatio: 1.3),
+                        itemCount: allDevices.length > 4 ? 4 : allDevices.length,
+                        itemBuilder: (_, i) => _deviceCard(allDevices[i], i),
+                      ),
+                    const SizedBox(height: 24),
+
+                    // ── My Scenes section
+                    _sectionHeader('My Scenes', null, null, icon: Icons.nightlight_round),
+                    const SizedBox(height: 12),
+                    if (scenes.isEmpty)
+                      _emptyState('There are no scenes added yet, you can create your custom scene.', Icons.wb_twilight,
+                          'Add Scene', () => Navigator.pushNamed(context, '/my-scenes'))
+                    else
+                      Column(children: [
+                        SizedBox(
+                          height: 88,
+                          child: ListView.separated(
+                            scrollDirection: Axis.horizontal,
+                            itemCount: scenes.length,
+                            separatorBuilder: (_, __) => const SizedBox(width: 12),
+                            itemBuilder: (_, i) => _sceneChip(scenes[i], i),
                           ),
                         ),
-                      ],
-                    ),
-                  ),
+                        const SizedBox(height: 12),
+                        OutlinedButton.icon(
+                          onPressed: () => Navigator.pushNamed(context, '/my-scenes'),
+                          style: OutlinedButton.styleFrom(side: const BorderSide(color: AppColors.primary, width: 1.5), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)), minimumSize: const Size(double.infinity, 46)),
+                          icon: const Icon(Icons.add, color: AppColors.primary, size: 20),
+                          label: const Text('Add Scene', style: TextStyle(color: AppColors.primary, fontSize: 14)),
+                        ),
+                      ]),
+                  ]),
                 ),
-              ),
-            ),
-          ],
+                // ── Bottom nav
+                Positioned(
+                  left: 16, right: 16, bottom: 14,
+                  child: Row(children: [
+                    _navBtn(Icons.nightlight_round, AppColors.primaryDark, () => Navigator.pushNamed(context, '/my-scenes')),
+                    const SizedBox(width: 10),
+                    _navBtn(Icons.grid_view_rounded, AppColors.primaryDark, () => Navigator.pushNamed(context, '/my-channels')),
+                    const SizedBox(width: 10),
+                    _navBtn(Icons.power_outlined, AppColors.primaryDark, () => Navigator.pushNamed(context, '/my-devices')),
+                    const SizedBox(width: 10),
+                    _navBtn(Icons.people_outline, AppColors.primaryDark, () => Navigator.pushNamed(context, '/users')),
+                    const Spacer(),
+                    _navBtn(Icons.close, AppColors.red, () => Navigator.pushReplacementNamed(context, '/login')),
+                  ]),
+                ),
+              ],
+            );
+          },
         ),
       ),
     );
   }
 
-  Widget _buildDockCircle(
-    BuildContext context,
-    IconData icon, {
-    VoidCallback? onTap,
-  }) {
+  Widget _sectionHeader(String title, String? btnLabel, VoidCallback? onBtnTap, {required IconData icon}) {
+    return Row(children: [
+      Icon(icon, color: AppColors.primaryDark, size: 18),
+      const SizedBox(width: 6),
+      Text(title, style: const TextStyle(color: AppColors.primaryDark, fontSize: 17, fontWeight: FontWeight.w700)),
+      const Spacer(),
+      if (btnLabel != null && onBtnTap != null)
+        OutlinedButton.icon(
+          onPressed: onBtnTap,
+          style: OutlinedButton.styleFrom(side: const BorderSide(color: AppColors.textPurple, width: 1.5), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)), padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6), visualDensity: VisualDensity.compact),
+          icon: const Icon(Icons.arrow_forward, color: AppColors.textPurple, size: 14),
+          label: Text(btnLabel, style: const TextStyle(color: AppColors.textPurple, fontSize: 11)),
+          iconAlignment: IconAlignment.end,
+        ),
+    ]);
+  }
+
+  Widget _channelChip(ChannelItem ch, int idx) {
+    return GestureDetector(
+      onTap: () => Navigator.pushNamed(context, '/channel-home'),
+      child: Container(
+        width: 130,
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(color: const Color(0xFFECEBFF), borderRadius: BorderRadius.circular(16)),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Row(children: [
+            const Icon(Icons.grid_view_rounded, color: AppColors.primaryMid, size: 18),
+            const Spacer(),
+            PowerButton(isOn: ch.isOn, onTap: () => _store.toggleChannel(idx), size: 32),
+          ]),
+          const SizedBox(height: 6),
+          Text(ch.name, style: const TextStyle(color: AppColors.primaryMid, fontSize: 13, fontWeight: FontWeight.w700)),
+          const SizedBox(height: 4),
+          Text(ch.devicesLabel, style: const TextStyle(color: AppColors.orange, fontSize: 11, fontWeight: FontWeight.w600)),
+        ]),
+      ),
+    );
+  }
+
+  Widget _deviceCard(DeviceItem device, int i) {
+    return GestureDetector(
+      onTap: () {
+        final ci = _store.channels.value.indexWhere((c) => c.name == device.channelName);
+        if (ci != -1) {
+          final di = _store.channels.value[ci].devices.indexWhere((d) => d.name == device.name && d.plug == device.plug);
+          if (di != -1) _store.toggleDevice(device.channelName, di);
+        }
+        setState(() {});
+      },
+      child: Container(
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16), boxShadow: const [BoxShadow(color: Color(0x14000000), blurRadius: 6, offset: Offset(0, 2))]),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [
+          Row(children: [
+            Icon(device.icon, color: AppColors.primaryMid, size: 20),
+            const Spacer(),
+            PowerButton(isOn: device.isOn, onTap: () {
+              final ci = _store.channels.value.indexWhere((c) => c.name == device.channelName);
+              if (ci != -1) {
+                final di = _store.channels.value[ci].devices.indexWhere((d) => d.name == device.name && d.plug == device.plug);
+                if (di != -1) _store.toggleDevice(device.channelName, di);
+              }
+              setState(() {});
+            }, size: 34),
+          ]),
+          const SizedBox(height: 5),
+          Text(device.name, style: const TextStyle(color: AppColors.primaryMid, fontSize: 12, fontWeight: FontWeight.w700), overflow: TextOverflow.ellipsis, maxLines: 1),
+          Text(device.channelName, style: const TextStyle(color: AppColors.textLight, fontSize: 10), overflow: TextOverflow.ellipsis, maxLines: 1),
+          const SizedBox(height: 3),
+          PlugTag(device.plug),
+        ]),
+      ),
+    );
+  }
+
+  Widget _sceneChip(SceneItem scene, int idx) {
+    final Color c = scene.isOn ? AppColors.green : AppColors.grey;
+    return GestureDetector(
+      onTap: () {
+        _store.toggleScene(idx);
+        setState(() {});
+      },
+      child: Container(
+        width: 80,
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(color: scene.isOn ? const Color(0xFFECEBFF) : const Color(0xFFF0F0F0), borderRadius: BorderRadius.circular(14)),
+        child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+          Container(width: 36, height: 36, decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.white, border: Border.all(color: c, width: 2)),
+              child: Icon(Icons.power_settings_new, color: c, size: 20)),
+          const SizedBox(height: 4),
+          Text(scene.name, style: const TextStyle(color: AppColors.primaryMid, fontSize: 10, fontWeight: FontWeight.w600), overflow: TextOverflow.ellipsis),
+        ]),
+      ),
+    );
+  }
+
+  Widget _emptyState(String text, IconData icon, String btnLabel, VoidCallback onTap) {
+    return Column(children: [
+      const SizedBox(height: 8),
+      Text(text, textAlign: TextAlign.center, style: const TextStyle(color: AppColors.textLight, fontSize: 13, height: 1.4)),
+      const SizedBox(height: 12),
+      OutlinedButton.icon(
+        onPressed: onTap,
+        style: OutlinedButton.styleFrom(side: const BorderSide(color: AppColors.primary, width: 1.5), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)), minimumSize: const Size(180, 44)),
+        icon: const Icon(Icons.add, color: AppColors.primary, size: 18),
+        label: Text(btnLabel, style: const TextStyle(color: AppColors.primary, fontSize: 14)),
+      ),
+      const SizedBox(height: 8),
+    ]);
+  }
+
+  Widget _navBtn(IconData icon, Color color, VoidCallback onTap) {
     return GestureDetector(
       onTap: onTap,
-      child: Container(
-        width: 28,
-        height: 28,
-        decoration: const BoxDecoration(
-          color: Color(0xFF0C0C54),
-          shape: BoxShape.circle,
-        ),
-        child: Icon(icon, color: Colors.white, size: 14),
-      ),
-    );
-  }
-
-  Widget _buildHomeDeviceCard({
-    required String name,
-    required String channel,
-    required String plug,
-    required IconData icon,
-    required bool isOn,
-    required VoidCallback onToggle,
-  }) {
-    final Color switchColor = isOn
-        ? const Color(0xFF5ACB5A)
-        : const Color(0xFFE86B6B);
-    return Container(
-      padding: const EdgeInsets.all(10),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF7F7F7),
-        borderRadius: BorderRadius.circular(18),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(icon, color: const Color(0xFF4B4FA3), size: 22),
-              const Spacer(),
-              GestureDetector(
-                onTap: onToggle,
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 180),
-                  width: 38,
-                  height: 38,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.white,
-                    border: Border.all(color: switchColor, width: 2),
-                    boxShadow: const [
-                      BoxShadow(
-                        color: Color(0x22000000),
-                        blurRadius: 8,
-                        offset: Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: Icon(
-                    Icons.power_settings_new,
-                    color: switchColor,
-                    size: 24,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Text(
-            name,
-            style: const TextStyle(
-              color: Color(0xFF4B4FA3),
-              fontSize: 14,
-              fontWeight: FontWeight.w700,
-            ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-          const SizedBox(height: 6),
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  channel,
-                  style: const TextStyle(
-                    color: Color(0xFF808080),
-                    fontSize: 11,
-                  ),
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-              const SizedBox(width: 6),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 2,
-                ),
-                decoration: BoxDecoration(
-                  border: Border.all(color: const Color(0xFFF08A2A), width: 2),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Text(
-                  plug,
-                  style: const TextStyle(
-                    color: Color(0xFFF08A2A),
-                    fontSize: 11,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
+      child: Container(width: 46, height: 46, decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+          child: Icon(icon, color: Colors.white, size: 22)),
     );
   }
 }

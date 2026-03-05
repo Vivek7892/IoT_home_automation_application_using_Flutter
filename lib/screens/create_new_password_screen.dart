@@ -1,195 +1,61 @@
 import 'package:flutter/material.dart';
+import '../constants/app_constants.dart';
 
 class CreateNewPasswordScreen extends StatefulWidget {
   const CreateNewPasswordScreen({super.key});
-
   @override
-  State<CreateNewPasswordScreen> createState() =>
-      _CreateNewPasswordScreenState();
+  State<CreateNewPasswordScreen> createState() => _State();
 }
 
-class _CreateNewPasswordScreenState extends State<CreateNewPasswordScreen> {
-  final TextEditingController passwordController = TextEditingController();
-  final TextEditingController confirmController = TextEditingController();
-
-  bool obscurePassword = true;
-  bool obscureConfirm = true;
-
-  @override
-  void dispose() {
-    passwordController.dispose();
-    confirmController.dispose();
-    super.dispose();
-  }
+class _State extends State<CreateNewPasswordScreen> {
+  bool _obscure1 = true, _obscure2 = true;
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () => FocusScope.of(context).unfocus(),
-
-      child: Scaffold(
-        backgroundColor: const Color(0xFFF2F2F2),
-
-        appBar: AppBar(
-          backgroundColor: const Color(0xFFF2F2F2),
-          elevation: 0,
-          centerTitle: true,
-          iconTheme: const IconThemeData(color: Color(0xFF484B9A)),
-          title: const Text(
-            "Create New Password",
-            style: TextStyle(
-              color: Color(0xFF484B9A),
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ),
-
-        body: SafeArea(
-          child: SingleChildScrollView(
-            padding: EdgeInsets.fromLTRB(
-              20,
-              20,
-              20,
-              MediaQuery.of(context).viewInsets.bottom + 20,
-            ),
-
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  "Your new password must be different from previously used passwords.",
-                  style: TextStyle(fontSize: 16, color: Colors.grey),
-                ),
-
-                const SizedBox(height: 40),
-
-                /// PASSWORD
-                const Text(
-                  "Password",
-                  style: TextStyle(fontSize: 18, color: Colors.grey),
-                ),
-
-                TextField(
-                  controller: passwordController,
-                  obscureText: obscurePassword,
-                  decoration: InputDecoration(
-                    hintText: "password@123",
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        obscurePassword
-                            ? Icons.visibility_off
-                            : Icons.visibility,
-                        color: const Color(0xFF484B9A),
-                      ),
-                      onPressed: () {
-                        setState(() => obscurePassword = !obscurePassword);
-                      },
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 25),
-
-                /// CONFIRM PASSWORD
-                const Text(
-                  "Confirm Password",
-                  style: TextStyle(fontSize: 18, color: Colors.grey),
-                ),
-
-                TextField(
-                  controller: confirmController,
-                  obscureText: obscureConfirm,
-                  decoration: InputDecoration(
-                    hintText: "password@123",
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        obscureConfirm
-                            ? Icons.visibility_off
-                            : Icons.visibility,
-                        color: const Color(0xFF484B9A),
-                      ),
-                      onPressed: () {
-                        setState(() => obscureConfirm = !obscureConfirm);
-                      },
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 50),
-
-                /// RESET BUTTON
-                SizedBox(
-                  width: double.infinity,
-                  height: 55,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      padding: EdgeInsets.zero,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                      backgroundColor: Colors.transparent,
-                      shadowColor: Colors.transparent,
-                    ),
-                    onPressed: () {
-                      FocusScope.of(context).unfocus();
-
-                      if (passwordController.text.length < 8) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text("Password must be 8 characters"),
-                          ),
-                        );
-                        return;
-                      }
-
-                      if (passwordController.text != confirmController.text) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text("Passwords do not match"),
-                          ),
-                        );
-                        return;
-                      }
-
-                      /// SUCCESS → GO BACK TO LOGIN
-                      Navigator.pushNamedAndRemoveUntil(
-                        context,
-                        '/login',
-                        (route) => false,
-                      );
-                    },
-                    child: Ink(
-                      decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          colors: [Color(0xFF6A75F2), Color(0xFFE46BBE)],
-                        ),
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                      child: const Center(
-                        child: Text(
-                          "Reset Password",
-                          style: TextStyle(
-                            fontSize: 18,
-                            color: Colors.white,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 40),
-
-                Align(
-                  alignment: Alignment.bottomRight,
-                  child: Image.asset("assets/bulb.png", width: 200),
-                ),
-              ],
-            ),
-          ),
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            const SizedBox(height: 8),
+            Row(children: [
+              IconButton(icon: const Icon(Icons.arrow_back, color: AppColors.primary), onPressed: () => Navigator.pop(context)),
+              const Expanded(child: Center(child: Text('Create New Password', style: TextStyle(color: AppColors.primary, fontSize: 20, fontWeight: FontWeight.w700)))),
+              const SizedBox(width: 48),
+            ]),
+            const SizedBox(height: 24),
+            const Text("Your new password must be different from your previous used passwords.", style: TextStyle(color: Color(0xFF666666), fontSize: 14, height: 1.5)),
+            const SizedBox(height: 28),
+            const Text('Password', style: TextStyle(color: Color(0xFF888888), fontSize: 15)),
+            const SizedBox(height: 6),
+            _passField('password@123', _obscure1, () => setState(() => _obscure1 = !_obscure1)),
+            const SizedBox(height: 6),
+            const Text('Must be atleast 8 characters.', style: TextStyle(color: Color(0xFF999999), fontSize: 12)),
+            const SizedBox(height: 20),
+            const Text('Confirm Password', style: TextStyle(color: Color(0xFF888888), fontSize: 15)),
+            const SizedBox(height: 6),
+            _passField('password@123', _obscure2, () => setState(() => _obscure2 = !_obscure2)),
+            const SizedBox(height: 6),
+            const Text('Both passwords must match.', style: TextStyle(color: Color(0xFF999999), fontSize: 12)),
+            const SizedBox(height: 36),
+            GradientButton(text: 'Reset Password', onPressed: () => Navigator.pushReplacementNamed(context, '/login'), height: 52),
+            const SizedBox(height: 60),
+            Align(alignment: Alignment.centerRight, child: Opacity(opacity: 0.5, child: Icon(Icons.lightbulb_outline, size: 130, color: const Color(0xFFFFD600).withOpacity(0.7)))),
+          ]),
         ),
       ),
     );
   }
+
+  Widget _passField(String hint, bool obscure, VoidCallback toggle) => TextField(
+    obscureText: obscure,
+    decoration: InputDecoration(
+      hintText: hint,
+      hintStyle: const TextStyle(color: Color(0xFFAAAAAA), fontSize: 15),
+      enabledBorder: const UnderlineInputBorder(borderSide: BorderSide(color: Color(0xFFCCCCCC))),
+      focusedBorder: const UnderlineInputBorder(borderSide: BorderSide(color: AppColors.primary)),
+      suffixIcon: IconButton(icon: Icon(obscure ? Icons.visibility_off_outlined : Icons.visibility_outlined, color: Colors.grey, size: 20), onPressed: toggle),
+    ),
+  );
 }

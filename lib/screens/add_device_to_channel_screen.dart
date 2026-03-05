@@ -1,380 +1,327 @@
 import 'package:flutter/material.dart';
+import '../constants/app_constants.dart';
+import '../models/app_store.dart';
 
 class AddDeviceToChannelScreen extends StatefulWidget {
   const AddDeviceToChannelScreen({super.key});
-
   @override
-  State<AddDeviceToChannelScreen> createState() =>
-      _AddDeviceToChannelScreenState();
+  State<AddDeviceToChannelScreen> createState() => _AddDeviceToChannelScreenState();
 }
 
 class _AddDeviceToChannelScreenState extends State<AddDeviceToChannelScreen> {
-  final TextEditingController _deviceNameController = TextEditingController(
-    text: "Fan",
-  );
+  final _store = AppStore.instance;
+  final _nameCtrl = TextEditingController();
+  int _selectedPlug = 1;
+  int _selectedChannelIdx = 0;
+  IconData _selectedIcon = Icons.lightbulb_outline;
 
-  String _selectedChannel = "Migro_CH1";
-  String _selectedPlug = "1";
-  final List<Map<String, dynamic>> _devices = [
-    {"name": "Fan", "plug": "Plug 1", "icon": Icons.toys},
-    {"name": "Desktop", "plug": "Plug 2", "icon": Icons.desktop_windows},
-    {"name": "TV", "plug": "Plug 3", "icon": Icons.tv},
+  static const List<IconData> _icons = [
+    Icons.lightbulb_outline, Icons.air, Icons.desktop_windows, Icons.tv,
+    Icons.kitchen, Icons.hot_tub, Icons.microwave, Icons.blender,
+    Icons.local_laundry_service, Icons.speaker,
   ];
 
   @override
   void dispose() {
-    _deviceNameController.dispose();
+    _nameCtrl.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF2F2F2),
+    final args = ModalRoute.of(context)?.settings.arguments;
+    String? preselectedChannel = args is String ? args : null;
 
-      body: SafeArea(
-        child: SingleChildScrollView(
-          physics: const BouncingScrollPhysics(),
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 10, 16, 40),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+    return ValueListenableBuilder<List<ChannelItem>>(
+      valueListenable: _store.channels,
+      builder: (context, channels, _) {
+        if (channels.isEmpty) {
+          return Scaffold(
+            appBar: AppBar(title: const Text('Add device to Channel')),
+            body: const Center(child: Text('No channels available. Add a channel first.')),
+          );
+        }
+
+        if (preselectedChannel != null) {
+          final idx = channels.indexWhere((c) => c.name == preselectedChannel);
+          if (idx != -1) _selectedChannelIdx = idx;
+        }
+
+        final selectedChannel = channels[_selectedChannelIdx];
+        final usedPlugs = selectedChannel.devices.map((d) => d.plug).toSet();
+        final availablePlugs = List.generate(4, (i) => 'Plug ${i + 1}').where((p) => !usedPlugs.contains(p)).toList();
+
+        return Scaffold(
+          backgroundColor: AppColors.background,
+          body: SafeArea(
+            child: Stack(
               children: [
-                /// ---------- APP BAR ----------
-                Row(
+                Column(
                   children: [
-                    IconButton(
-                      onPressed: () => Navigator.pop(context),
-                      icon: const Icon(
-                        Icons.arrow_back,
-                        color: Color(0xFF4B4FA3),
-                      ),
-                    ),
-                    const Expanded(
-                      child: Text(
-                        "Add device to Channel",
-                        style: TextStyle(
-                          color: Color(0xFF2C2F84),
-                          fontSize: 24,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ),
-                    TextButton(
-                      onPressed: () {
-                        Navigator.pushNamedAndRemoveUntil(
-                          context,
-                          '/channel-home',
-                          (route) => false,
-                        );
-                      },
-                      child: const Text(
-                        "Done",
-                        style: TextStyle(
-                          color: Color(0xFF4B4FA3),
-                          fontSize: 17,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: 14),
-
-                const Text(
-                  "You can add more than one device at a time, just choose the\n"
-                  "channel, provide device name, choose device icon and save it.",
-                  style: TextStyle(
-                    color: Color(0xFF787878),
-                    fontSize: 13,
-                    fontStyle: FontStyle.italic,
-                  ),
-                ),
-
-                const SizedBox(height: 26),
-
-                /// ---------- DEVICE NAME ----------
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                    // ── App Bar
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                      child: Row(
                         children: [
-                          const Text(
-                            "Provide Device Name",
-                            style: TextStyle(
-                              color: Color(0xFF5F5F5F),
-                              fontSize: 20,
-                            ),
+                          IconButton(
+                            icon: const Icon(Icons.arrow_back_ios_new, color: AppColors.primaryDark, size: 20),
+                            onPressed: () => Navigator.pop(context),
                           ),
-                          const SizedBox(height: 6),
-                          TextField(
-                            controller: _deviceNameController,
-                            style: const TextStyle(
-                              color: Color(0xFF4B4FA3),
-                              fontSize: 32,
-                              fontWeight: FontWeight.w500,
-                            ),
-                            decoration: const InputDecoration(
-                              isDense: true,
-                              contentPadding: EdgeInsets.only(bottom: 8),
-                              enabledBorder: UnderlineInputBorder(
-                                borderSide: BorderSide(
-                                  color: Color(0xFF9A9A9A),
-                                  width: 2,
-                                ),
-                              ),
-                              focusedBorder: UnderlineInputBorder(
-                                borderSide: BorderSide(
-                                  color: Color(0xFF6C74F3),
-                                  width: 2,
-                                ),
-                              ),
-                            ),
+                          const Expanded(
+                            child: Text('Add device to Channel', textAlign: TextAlign.center,
+                                style: TextStyle(color: AppColors.primaryDark, fontSize: 17, fontWeight: FontWeight.w700)),
+                          ),
+                          TextButton(
+                            onPressed: () => Navigator.pop(context),
+                            child: const Text('Done', style: TextStyle(color: AppColors.primaryDark, fontSize: 15, fontWeight: FontWeight.w600)),
                           ),
                         ],
                       ),
                     ),
-
-                    const SizedBox(width: 12),
-
-                    Container(
-                      width: 90,
-                      height: 90,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: const Color(0xFF4B4FA3),
-                          width: 2,
-                        ),
-                      ),
-                      child: const Icon(
-                        Icons.toys,
-                        size: 40,
-                        color: Color(0xFF4B4FA3),
-                      ),
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: 24),
-
-                /// ---------- DROPDOWNS ----------
-                Row(
-                  children: [
                     Expanded(
-                      child: _buildDropdownBlock(
-                        title: "Choose Channel",
-                        value: _selectedChannel,
-                        items: const ["Migro_CH1"],
-                        onChanged: (value) =>
-                            setState(() => _selectedChannel = value!),
-                      ),
-                    ),
-                    const SizedBox(width: 20),
-                    Expanded(
-                      child: _buildDropdownBlock(
-                        title: "Choose Plug",
-                        value: _selectedPlug,
-                        items: const ["1", "2", "3", "4"],
-                        onChanged: (value) =>
-                            setState(() => _selectedPlug = value!),
-                      ),
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: 24),
-
-                /// ---------- SAVE BUTTON ----------
-                SizedBox(
-                  width: double.infinity,
-                  height: 54,
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(14),
-                      gradient: const LinearGradient(
-                        colors: [Color(0xFF7B84F7), Color(0xFFE46BBE)],
-                      ),
-                    ),
-                    child: ElevatedButton(
-                      onPressed: () {
-                        final name = _deviceNameController.text.trim();
-                        if (name.isEmpty) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text("Please provide device name"),
+                      child: SingleChildScrollView(
+                        padding: const EdgeInsets.fromLTRB(20, 4, 20, 110),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'You can add more than one device at a time, just choose the channel, provide device name, choose device icon and save it.',
+                              style: TextStyle(color: AppColors.textLight, fontSize: 12, fontStyle: FontStyle.italic, height: 1.4),
                             ),
-                          );
-                          return;
-                        }
+                            const SizedBox(height: 20),
 
-                        final plugLabel = "Plug $_selectedPlug";
-                        final alreadyExists = _devices.any(
-                          (device) => device["plug"] == plugLabel,
-                        );
-                        if (alreadyExists) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                "$plugLabel is already assigned in $_selectedChannel",
-                              ),
+                            // ── Device Name + Icon
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      const Text('Provide Device Name',
+                                          style: TextStyle(color: AppColors.textLight, fontSize: 14)),
+                                      TextField(
+                                        controller: _nameCtrl,
+                                        style: const TextStyle(color: AppColors.primary, fontSize: 15, fontWeight: FontWeight.w600),
+                                        decoration: const InputDecoration(
+                                          hintText: 'Fan',
+                                          hintStyle: TextStyle(color: AppColors.grey),
+                                          border: UnderlineInputBorder(),
+                                          focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: AppColors.primary)),
+                                          enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: AppColors.lightGrey)),
+                                          contentPadding: EdgeInsets.symmetric(vertical: 8),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(width: 16),
+                                GestureDetector(
+                                  onTap: _pickIcon,
+                                  child: Container(
+                                    width: 60, height: 60,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      border: Border.all(color: AppColors.primary, width: 1.5),
+                                    ),
+                                    child: Icon(_selectedIcon, color: AppColors.primary, size: 28),
+                                  ),
+                                ),
+                              ],
                             ),
-                          );
-                          return;
-                        }
+                            const SizedBox(height: 20),
 
-                        setState(() {
-                          _devices.add({
-                            "name": name,
-                            "plug": plugLabel,
-                            "icon": Icons.memory,
-                          });
-                        });
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text("Device saved")),
-                        );
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.transparent,
-                        shadowColor: Colors.transparent,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14),
-                        ),
-                      ),
-                      child: const Text(
-                        "Save",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 20,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
+                            // ── Channel + Plug dropdowns
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      const Text('Choose Channel',
+                                          style: TextStyle(color: AppColors.textLight, fontSize: 14)),
+                                      DropdownButtonHideUnderline(
+                                        child: DropdownButton<int>(
+                                          value: _selectedChannelIdx,
+                                          isExpanded: true,
+                                          style: const TextStyle(color: AppColors.primary, fontSize: 14, fontWeight: FontWeight.w600),
+                                          items: List.generate(channels.length, (i) =>
+                                              DropdownMenuItem(value: i, child: Text(channels[i].name))),
+                                          onChanged: (v) => setState(() { _selectedChannelIdx = v!; _selectedPlug = 1; }),
+                                        ),
+                                      ),
+                                      const Divider(color: AppColors.lightGrey, height: 1),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(width: 16),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      const Text('Choose Plug',
+                                          style: TextStyle(color: AppColors.textLight, fontSize: 14)),
+                                      DropdownButtonHideUnderline(
+                                        child: DropdownButton<int>(
+                                          value: _selectedPlug,
+                                          isExpanded: true,
+                                          style: const TextStyle(color: AppColors.primary, fontSize: 14, fontWeight: FontWeight.w600),
+                                          items: List.generate(4, (i) => DropdownMenuItem(value: i + 1, child: Text('${i + 1}'))),
+                                          onChanged: (v) => setState(() => _selectedPlug = v!),
+                                        ),
+                                      ),
+                                      const Divider(color: AppColors.lightGrey, height: 1),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 24),
 
-                const SizedBox(height: 30),
+                            // ── Save button
+                            GradientButton(text: 'Save', onPressed: _save),
+                            const SizedBox(height: 28),
 
-                /// ---------- DEVICES HEADER ----------
-                const Row(
-                  children: [
-                    Icon(Icons.power, color: Color(0xFF0B0F79), size: 22),
-                    SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        "Devices in Migro_CH1",
-                        style: TextStyle(
-                          color: Color(0xFF0B0F79),
-                          fontSize: 26,
-                          fontWeight: FontWeight.w700,
+                            // ── Devices list
+                            Row(
+                              children: [
+                                const Icon(Icons.power, color: AppColors.primaryDark, size: 18),
+                                const SizedBox(width: 6),
+                                Text('Devices in ${selectedChannel.name}',
+                                    style: const TextStyle(color: AppColors.primaryDark, fontSize: 15, fontWeight: FontWeight.w700)),
+                              ],
+                            ),
+                            const SizedBox(height: 4),
+                            Text('List of all devices in this channel. Slide left to remove device.',
+                                style: const TextStyle(color: AppColors.textLight, fontSize: 12, fontStyle: FontStyle.italic)),
+                            const SizedBox(height: 12),
+                            if (selectedChannel.devices.isEmpty)
+                              const Padding(
+                                padding: EdgeInsets.symmetric(vertical: 16),
+                                child: Center(
+                                  child: Text('No devices yet. Add one above.',
+                                      style: TextStyle(color: AppColors.textLight, fontSize: 13)),
+                                ),
+                              )
+                            else
+                              ...selectedChannel.devices.asMap().entries.map((e) =>
+                                  _dismissibleDevice(e.value, e.key, selectedChannel.name)),
+                          ],
                         ),
                       ),
                     ),
                   ],
                 ),
-
-                const SizedBox(height: 8),
-
-                const Text(
-                  "List of all devices in this channel. Slide left to remove device.",
-                  style: TextStyle(
-                    color: Color(0xFF8C8C8C),
-                    fontSize: 14,
-                    fontStyle: FontStyle.italic,
-                  ),
-                ),
-
-                const SizedBox(height: 16),
-
-                ..._devices.asMap().entries.map((entry) {
-                  final device = entry.value;
-                  return Padding(
-                    padding: EdgeInsets.only(
-                      bottom: entry.key == _devices.length - 1 ? 0 : 12,
-                    ),
-                    child: _buildDeviceCard(
-                      device["name"] as String,
-                      device["plug"] as String,
-                      device["icon"] as IconData,
-                    ),
-                  );
-                }),
-
-                const SizedBox(height: 80),
               ],
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 
-  /// ---------- DROPDOWN ----------
-  Widget _buildDropdownBlock({
-    required String title,
-    required String value,
-    required List<String> items,
-    required ValueChanged<String?> onChanged,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          title,
-          style: const TextStyle(color: Color(0xFF5F5F5F), fontSize: 20),
+  Widget _dismissibleDevice(DeviceItem d, int idx, String channelName) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Dismissible(
+        key: Key('${channelName}_${d.plug}'),
+        background: Container(
+          decoration: BoxDecoration(color: Colors.blue, borderRadius: BorderRadius.circular(14)),
+          alignment: Alignment.centerLeft,
+          padding: const EdgeInsets.only(left: 16),
+          child: const Icon(Icons.edit, color: Colors.white),
         ),
-        DropdownButtonHideUnderline(
-          child: DropdownButton<String>(
-            value: value,
-            isExpanded: true,
-            icon: const Icon(Icons.arrow_drop_down, color: Color(0xFF4B4FA3)),
-            items: items
-                .map((e) => DropdownMenuItem(value: e, child: Text(e)))
-                .toList(),
-            onChanged: onChanged,
+        secondaryBackground: Container(
+          decoration: BoxDecoration(color: AppColors.red, borderRadius: BorderRadius.circular(14)),
+          alignment: Alignment.centerRight,
+          padding: const EdgeInsets.only(right: 16),
+          child: const Icon(Icons.delete, color: Colors.white),
+        ),
+        onDismissed: (dir) {
+          if (dir == DismissDirection.endToStart) {
+            final list = List<ChannelItem>.from(_store.channels.value);
+            final ci = list.indexWhere((c) => c.name == channelName);
+            if (ci != -1) {
+              final devs = List<DeviceItem>.from(list[ci].devices)..removeAt(idx);
+              list[ci] = list[ci].copyWith(devices: devs);
+              _store.channels.value = list;
+            }
+          }
+        },
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(14),
+            boxShadow: const [BoxShadow(color: Color(0x10000000), blurRadius: 4)],
           ),
-        ),
-        Container(height: 2, color: const Color(0xFF9A9A9A)),
-      ],
-    );
-  }
-
-  /// ---------- DEVICE CARD ----------
-  Widget _buildDeviceCard(String name, String plug, IconData icon) {
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
-      ),
-      child: Row(
-        children: [
-          Icon(icon, size: 30, color: const Color(0xFF4B4FA3)),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              name,
-              style: const TextStyle(
-                color: Color(0xFF4B4FA3),
-                fontSize: 22,
-                fontWeight: FontWeight.w700,
+          child: Row(
+            children: [
+              Icon(d.icon, color: AppColors.primaryMid, size: 20),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(children: [
+                      Text(d.name, style: const TextStyle(color: AppColors.primaryMid, fontSize: 14, fontWeight: FontWeight.w600)),
+                      const SizedBox(width: 8),
+                      PlugTag(d.plug),
+                    ]),
+                    const SizedBox(height: 2),
+                    const Text('Slide left to delete, slide right to edit.',
+                        style: TextStyle(color: AppColors.textLight, fontSize: 11, fontStyle: FontStyle.italic)),
+                  ],
+                ),
               ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _save() {
+    final name = _nameCtrl.text.trim();
+    if (name.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please enter a device name')));
+      return;
+    }
+    final channels = _store.channels.value;
+    final ch = channels[_selectedChannelIdx];
+    if (ch.devices.length >= ch.totalPlugs) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('${ch.name} is full (max ${ch.totalPlugs} devices)')));
+      return;
+    }
+    final plugLabel = 'Plug $_selectedPlug';
+    _store.addDeviceToChannel(ch.name, DeviceItem(
+      name: name, channelName: ch.name, plug: plugLabel, icon: _selectedIcon,
+    ));
+    _nameCtrl.clear();
+    setState(() => _selectedPlug = 1);
+  }
+
+  void _pickIcon() {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      builder: (_) => Container(
+        padding: const EdgeInsets.all(20),
+        child: GridView.builder(
+          shrinkWrap: true,
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 5, mainAxisSpacing: 12, crossAxisSpacing: 12),
+          itemCount: _icons.length,
+          itemBuilder: (_, i) => GestureDetector(
+            onTap: () { setState(() => _selectedIcon = _icons[i]); Navigator.pop(context); },
+            child: Container(
+              decoration: BoxDecoration(
+                color: _selectedIcon == _icons[i] ? AppColors.primary.withOpacity(0.1) : Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: _selectedIcon == _icons[i] ? AppColors.primary : AppColors.lightGrey),
+              ),
+              child: Icon(_icons[i], color: AppColors.primaryMid, size: 28),
             ),
           ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-            decoration: BoxDecoration(
-              border: Border.all(color: const Color(0xFFF08A2A), width: 2),
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Text(
-              plug,
-              style: const TextStyle(color: Color(0xFFF08A2A), fontSize: 13),
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
