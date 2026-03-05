@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../constants/app_constants.dart';
 import '../models/app_store.dart';
+import 'qr_scanner_screen.dart';
 
 class AddChannelQRScreen extends StatefulWidget {
   const AddChannelQRScreen({super.key});
@@ -70,7 +71,7 @@ class _AddChannelQRScreenState extends State<AddChannelQRScreen> {
 
                         // ── Scan QR button
                         OutlinedButton(
-                          onPressed: () {},
+                          onPressed: _scanQRCode,
                           style: OutlinedButton.styleFrom(
                             side: const BorderSide(color: AppColors.primary, width: 1.5),
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
@@ -160,6 +161,22 @@ class _AddChannelQRScreenState extends State<AddChannelQRScreen> {
         ),
       ),
     );
+  }
+
+  void _scanQRCode() async {
+    final result = await Navigator.push<String>(
+      context,
+      MaterialPageRoute(builder: (context) => const QRScannerScreen()),
+    );
+    
+    if (result != null && mounted) {
+      setState(() {
+        _nameCtrl.text = result;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('QR Code scanned: $result'), backgroundColor: AppColors.green),
+      );
+    }
   }
 
   void _onNext() {
