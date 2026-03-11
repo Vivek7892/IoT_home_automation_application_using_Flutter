@@ -1,6 +1,12 @@
+import 'dart:async';
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:permission_handler/permission_handler.dart';
 import '../constants/app_constants.dart';
 import '../models/app_store.dart';
+import 'qr_scanner_screen.dart';
 
 // ─── Channel Home Screen ──────────────────────────────────────────────────────
 class ChannelHomeScreen extends StatefulWidget {
@@ -218,6 +224,129 @@ class _DeviceRow extends StatelessWidget {
 }
 
 // ─── Add Channel QR Screen ────────────────────────────────────────────────────
+class ChannelSetupData {
+  final String channelName;
+  final String ssid;
+  final String password;
+  final bool rememberWifi;
+  final String moduleBaseUrl;
+  final String? moduleId;
+  final String? qrPayload;
+
+  const ChannelSetupData({
+    required this.channelName,
+    required this.ssid,
+    required this.password,
+    required this.rememberWifi,
+    required this.moduleBaseUrl,
+    this.moduleId,
+    this.qrPayload,
+  });
+
+  factory ChannelSetupData.initial() {
+    return const ChannelSetupData(
+      channelName: 'Migro_CH1',
+      ssid: '',
+      password: '',
+      rememberWifi: true,
+      moduleBaseUrl: 'http://192.168.4.1',
+    );
+  }
+
+  ChannelSetupData copyWith({
+    String? channelName,
+    String? ssid,
+    String? password,
+    bool? rememberWifi,
+    String? moduleBaseUrl,
+    String? moduleId,
+    String? qrPayload,
+  }) {
+    return ChannelSetupData(
+      channelName: channelName ?? this.channelName,
+      ssid: ssid ?? this.ssid,
+      password: password ?? this.password,
+      rememberWifi: rememberWifi ?? this.rememberWifi,
+      moduleBaseUrl: moduleBaseUrl ?? this.moduleBaseUrl,
+      moduleId: moduleId ?? this.moduleId,
+      qrPayload: qrPayload ?? this.qrPayload,
+    );
+  }
+
+  static ChannelSetupData fromRouteArgs(Object? args) {
+    if (args is ChannelSetupData) return args;
+    if (args is String && args.trim().isNotEmpty) {
+      return ChannelSetupData.initial().copyWith(channelName: args.trim());
+    }
+    if (args is Map<String, dynamic>) {
+      return ChannelSetupData.initial().copyWith(
+        channelName: (args['channelName'] as String?)?.trim(),
+        ssid: (args['ssid'] as String?)?.trim(),
+        password: args['password'] as String?,
+        rememberWifi: args['rememberWifi'] as bool?,
+        moduleBaseUrl: (args['moduleBaseUrl'] as String?)?.trim(),
+        moduleId: (args['moduleId'] as String?)?.trim(),
+      );
+    }
+    return ChannelSetupData.initial();
+  }
+
+  static ChannelSetupData fromQrPayload(String payload, ChannelSetupData current) {
+    final raw = payload.trim();
+    if (raw.isEmpty) return current;
+    final next = current.copyWith(qrPayload: raw);
+
+    try {
+      if (raw.startsWith('{') && raw.endsWith('}')) {
+        final decoded = jsonDecode(raw);
+        if (decoded is Map<String, dynamic>) {
+          final channelName = (decoded['channelName'] ?? decoded['channel']) as String?;
+          final moduleId = (decoded['moduleId'] ?? decoded['id']) as String?;
+          final baseUrl = (decoded['baseUrl'] ?? decoded['url'] ?? decoded['ip']) as String?;
+          return next.copyWith(
+            channelName: channelName?.trim().isNotEmpty == true ? channelName!.trim() : null,
+            moduleId: moduleId?.trim(),
+            moduleBaseUrl: _normalizeModuleUrl(baseUrl),
+          );
+        }
+      }
+    } catch (_) {
+      // Continue with fallback parsing.
+    }
+
+    final uri = Uri.tryParse(raw);
+    if (uri != null && uri.hasScheme && uri.host.isNotEmpty) {
+      final qp = uri.queryParameters;
+      return next.copyWith(
+        channelName: (qp['channel'] ?? qp['channelName'])?.trim().isNotEmpty == true
+            ? (qp['channel'] ?? qp['channelName'])!.trim()
+            : null,
+        moduleId: (qp['module'] ?? qp['moduleId'])?.trim(),
+        moduleBaseUrl: _normalizeModuleUrl('${uri.scheme}://${uri.host}:${uri.port}'),
+      );
+    }
+
+    if (RegExp(r'^\\d{1,3}(\\.\\d{1,3}){3}$').hasMatch(raw)) {
+      return next.copyWith(moduleBaseUrl: _normalizeModuleUrl(raw));
+    }
+
+    if (raw.toLowerCase().startsWith('migro_')) {
+      return next.copyWith(channelName: raw);
+    }
+
+    return next.copyWith(moduleId: raw);
+  }
+
+  static String _normalizeModuleUrl(String? value) {
+    final v = (value ?? '').trim();
+    if (v.isEmpty) return 'http://192.168.4.1';
+    if (v.startsWith('http://') || v.startsWith('https://')) {
+      return v.endsWith('/') ? v.substring(0, v.length - 1) : v;
+    }
+    return 'http://${v.endsWith('/') ? v.substring(0, v.length - 1) : v}';
+  }
+}
+
 class AddChannelQRScreen extends StatefulWidget {
   const AddChannelQRScreen({super.key});
   @override
@@ -227,9 +356,67 @@ class AddChannelQRScreen extends StatefulWidget {
 class _AddChannelQRScreenState extends State<AddChannelQRScreen> {
   bool _rememberWifi = true;
   final _nameCtrl = TextEditingController(text: 'Migro_CH1');
+  ChannelSetupData _setup = ChannelSetupData.initial();
+  bool _initialized = false;
 
   @override
-  void dispose() { _nameCtrl.dispose(); super.dispose(); }
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_initialized) return;
+    _setup = ChannelSetupData.fromRouteArgs(ModalRoute.of(context)?.settings.arguments);
+    _rememberWifi = _setup.rememberWifi;
+    _nameCtrl.text = _setup.channelName;
+    _initialized = true;
+  }
+
+  @override
+  void dispose() {
+    _nameCtrl.dispose();
+    super.dispose();
+  }
+
+  Future<void> _scanQrCode() async {
+    final status = await Permission.camera.request();
+    if (!status.isGranted) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Camera permission is required to scan QR code.')),
+      );
+      if (status.isPermanentlyDenied) {
+        await openAppSettings();
+      }
+      return;
+    }
+
+    if (!mounted) return;
+    final result = await Navigator.push<String>(
+      context,
+      MaterialPageRoute(builder: (_) => const QRScannerScreen()),
+    );
+    if (!mounted || result == null || result.trim().isEmpty) return;
+    setState(() {
+      _setup = ChannelSetupData.fromQrPayload(result, _setup);
+      _nameCtrl.text = _setup.channelName;
+    });
+  }
+
+  void _onNext() {
+    final name = _nameCtrl.text.trim();
+    if (name.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter channel name.')),
+      );
+      return;
+    }
+    Navigator.pushNamed(
+      context,
+      '/connecting',
+      arguments: _setup.copyWith(
+        channelName: name,
+        rememberWifi: _rememberWifi,
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -241,7 +428,7 @@ class _AddChannelQRScreenState extends State<AddChannelQRScreen> {
         leading: IconButton(icon: const Icon(Icons.arrow_back, color: AppColors.primary), onPressed: () => Navigator.pop(context)),
         centerTitle: true,
         title: const Text('Add Channel', style: TextStyle(color: AppColors.primary, fontSize: 20, fontWeight: FontWeight.w700)),
-        actions: [TextButton(onPressed: () => Navigator.pushNamed(context, '/add-channel-wifi', arguments: {'name': _nameCtrl.text.trim(), 'remember': _rememberWifi}), child: const Text('Next', style: TextStyle(color: AppColors.primary, fontSize: 16, fontWeight: FontWeight.w600)))],
+        actions: [TextButton(onPressed: _onNext, child: const Text('Next', style: TextStyle(color: AppColors.primary, fontSize: 16, fontWeight: FontWeight.w600)))],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -251,7 +438,7 @@ class _AddChannelQRScreenState extends State<AddChannelQRScreen> {
           Container(height: 180, width: 180, decoration: BoxDecoration(color: const Color(0xFFF0F0F0), borderRadius: BorderRadius.circular(16)), child: const Icon(Icons.electrical_services, size: 80, color: Color(0xFF888888))),
           const SizedBox(height: 24),
           OutlinedButton(
-            onPressed: () {},
+            onPressed: _scanQrCode,
             style: OutlinedButton.styleFrom(side: const BorderSide(color: AppColors.primary, width: 1.8), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)), minimumSize: const Size(200, 48)),
             child: const Text('Scan QR Code', style: TextStyle(color: AppColors.primary, fontSize: 16)),
           ),
@@ -285,27 +472,39 @@ class AddChannelWifiScreen extends StatefulWidget {
 }
 
 class _AddChannelWifiScreenState extends State<AddChannelWifiScreen> {
-  final _ssidCtrl = TextEditingController(text: 'MY_Home_WiFI');
-  final _passCtrl = TextEditingController(text: 'MY_Home_WiFI_Password');
-  late String _channelName;
+  final _ssidCtrl = TextEditingController();
+  final _passCtrl = TextEditingController();
+  ChannelSetupData _setup = ChannelSetupData.initial();
+  bool _initialized = false;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
-    _channelName = args?['name'] as String? ?? 'Migro_CH1';
+    if (_initialized) return;
+    _setup = ChannelSetupData.fromRouteArgs(ModalRoute.of(context)?.settings.arguments);
+    _ssidCtrl.text = _setup.ssid;
+    _passCtrl.text = _setup.password;
+    _initialized = true;
   }
 
   @override
   void dispose() { _ssidCtrl.dispose(); _passCtrl.dispose(); super.dispose(); }
 
   void _next() {
-    if (_ssidCtrl.text.trim().isEmpty || _passCtrl.text.trim().isEmpty) {
+    final ssid = _ssidCtrl.text.trim();
+    final pass = _passCtrl.text.trim();
+    if (ssid.isEmpty || pass.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please enter WiFi SSID and Password')));
       return;
     }
-    AppStore.instance.addChannel(_channelName);
-    Navigator.pushNamed(context, '/connecting');
+    Navigator.pushNamed(
+      context,
+      '/scan-channel-qr',
+      arguments: _setup.copyWith(
+        ssid: ssid,
+        password: pass,
+      ),
+    );
   }
 
   @override
@@ -342,10 +541,10 @@ class _AddChannelWifiScreenState extends State<AddChannelWifiScreen> {
           )),
           const SizedBox(height: 24),
           const Text('Enter SSID', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15, color: Color(0xFF666666))),
-          TextField(controller: _ssidCtrl, decoration: const InputDecoration(hintText: 'MY_Home_WiFI', enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Color(0xFFCCCCCC))))),
+          TextField(controller: _ssidCtrl, decoration: const InputDecoration(hintText: 'MY_Home_WiFi', enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Color(0xFFCCCCCC))))),
           const SizedBox(height: 20),
           const Text('Enter Password', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15, color: Color(0xFF666666))),
-          TextField(controller: _passCtrl, obscureText: true, decoration: const InputDecoration(hintText: 'MY_Home_WiFI_Password', enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Color(0xFFCCCCCC))))),
+          TextField(controller: _passCtrl, obscureText: true, decoration: const InputDecoration(hintText: 'MY_Home_WiFi_Password', enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Color(0xFFCCCCCC))))),
           const SizedBox(height: 36),
           GradientButton(text: 'Next', onPressed: _next, height: 52),
           const SizedBox(height: 20),
@@ -364,18 +563,62 @@ class ConnectingScreen extends StatefulWidget {
 
 class _ConnectingScreenState extends State<ConnectingScreen> with SingleTickerProviderStateMixin {
   late AnimationController _ctrl;
+  Timer? _progressTimer;
+  double _progress = 0.1;
+  String _statusText = 'Attempting to connect, please wait.';
+  ChannelSetupData _setup = ChannelSetupData.initial();
+  bool _started = false;
 
   @override
   void initState() {
     super.initState();
     _ctrl = AnimationController(vsync: this, duration: const Duration(seconds: 1))..repeat();
-    Future.delayed(const Duration(seconds: 3), () {
-      if (mounted) Navigator.pushReplacementNamed(context, '/connection-success');
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || _started) return;
+      _started = true;
+      _setup = ChannelSetupData.fromRouteArgs(ModalRoute.of(context)?.settings.arguments);
+      _startProvisioning();
     });
   }
 
   @override
-  void dispose() { _ctrl.dispose(); super.dispose(); }
+  void dispose() {
+    _progressTimer?.cancel();
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  Future<void> _startProvisioning() async {
+    _progressTimer = Timer.periodic(const Duration(milliseconds: 320), (_) {
+      if (!mounted) return;
+      setState(() {
+        _progress = (_progress + 0.05).clamp(0.1, 0.9);
+      });
+    });
+
+    setState(() {
+      _statusText = 'Sending WiFi credentials to module...';
+    });
+
+    final result = await _Esp32ProvisioningService().provision(_setup);
+    if (!mounted) return;
+
+    _progressTimer?.cancel();
+    setState(() {
+      _progress = 1;
+      _statusText = result.message;
+    });
+
+    await Future.delayed(const Duration(milliseconds: 450));
+    if (!mounted) return;
+
+    if (result.success) {
+      AppStore.instance.addChannel(_setup.channelName);
+      Navigator.pushReplacementNamed(context, '/connection-success', arguments: _setup.channelName);
+    } else {
+      Navigator.pushReplacementNamed(context, '/connection-failed', arguments: _setup.channelName);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -389,7 +632,18 @@ class _ConnectingScreenState extends State<ConnectingScreen> with SingleTickerPr
           const SizedBox(height: 20),
           const Text('Connecting to Device.', style: TextStyle(color: AppColors.primaryMid, fontSize: 20, fontWeight: FontWeight.w700)),
           const SizedBox(height: 12),
-          const Text('Attempting to connect, please wait.', style: TextStyle(color: AppColors.textLight, fontSize: 15)),
+          Text(_statusText, textAlign: TextAlign.center, style: const TextStyle(color: AppColors.textLight, fontSize: 15)),
+          const SizedBox(height: 18),
+          SizedBox(
+            width: 220,
+            child: LinearProgressIndicator(
+              value: _progress,
+              minHeight: 6,
+              borderRadius: BorderRadius.circular(8),
+              color: AppColors.primary,
+              backgroundColor: AppColors.lightGrey,
+            ),
+          ),
         ]),
       ),
     );
@@ -397,18 +651,124 @@ class _ConnectingScreenState extends State<ConnectingScreen> with SingleTickerPr
 }
 
 // ─── Connection Success Screen ────────────────────────────────────────────────
+class _Esp32ProvisioningService {
+  Future<_ProvisionResult> provision(ChannelSetupData setup) async {
+    final baseUrl = _normalizeBaseUrl(setup.moduleBaseUrl);
+    final client = HttpClient()..connectionTimeout = const Duration(seconds: 4);
+    try {
+      final reachable = await _isReachable(client, baseUrl);
+      if (!reachable) {
+        return const _ProvisionResult(
+          false,
+          'Module not reachable. Connect phone WiFi to ESP32 AP and retry.',
+        );
+      }
+
+      final payload = <String, dynamic>{
+        'channelName': setup.channelName,
+        'ssid': setup.ssid,
+        'password': setup.password,
+        'rememberWifi': setup.rememberWifi,
+        if (setup.moduleId != null && setup.moduleId!.trim().isNotEmpty) 'moduleId': setup.moduleId!.trim(),
+      };
+
+      const endpoints = ['/provision', '/configure', '/wifi', '/connect', '/setup'];
+      for (final endpoint in endpoints) {
+        final ok = await _postJson(client, '$baseUrl$endpoint', payload);
+        if (ok) {
+          return const _ProvisionResult(true, 'Channel connected successfully.');
+        }
+      }
+
+      final queryOk = await _get(
+        client,
+        Uri.parse('$baseUrl/configure').replace(queryParameters: {
+          'ssid': setup.ssid,
+          'password': setup.password,
+          'channelName': setup.channelName,
+        }).toString(),
+      );
+      if (queryOk) {
+        return const _ProvisionResult(true, 'Channel connected successfully.');
+      }
+
+      return const _ProvisionResult(
+        false,
+        'Module reachable but provisioning endpoint did not accept credentials.',
+      );
+    } catch (_) {
+      return const _ProvisionResult(
+        false,
+        'Failed to send data to module. Check ESP32 firmware endpoint configuration.',
+      );
+    } finally {
+      client.close(force: true);
+    }
+  }
+
+  Future<bool> _isReachable(HttpClient client, String baseUrl) async {
+    const endpoints = ['/ping', '/health', '/'];
+    for (final endpoint in endpoints) {
+      if (await _get(client, '$baseUrl$endpoint')) return true;
+    }
+    return false;
+  }
+
+  Future<bool> _get(HttpClient client, String url) async {
+    try {
+      final req = await client.getUrl(Uri.parse(url)).timeout(const Duration(seconds: 4));
+      final resp = await req.close().timeout(const Duration(seconds: 4));
+      await resp.drain();
+      return resp.statusCode >= 200 && resp.statusCode < 300;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  Future<bool> _postJson(HttpClient client, String url, Map<String, dynamic> payload) async {
+    try {
+      final req = await client.postUrl(Uri.parse(url)).timeout(const Duration(seconds: 5));
+      req.headers.set(HttpHeaders.contentTypeHeader, 'application/json');
+      req.add(utf8.encode(jsonEncode(payload)));
+      final resp = await req.close().timeout(const Duration(seconds: 6));
+      await resp.drain();
+      return resp.statusCode >= 200 && resp.statusCode < 300;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  String _normalizeBaseUrl(String raw) {
+    var normalized = raw.trim();
+    if (normalized.isEmpty) normalized = 'http://192.168.4.1';
+    if (!normalized.startsWith('http://') && !normalized.startsWith('https://')) {
+      normalized = 'http://$normalized';
+    }
+    if (normalized.endsWith('/')) normalized = normalized.substring(0, normalized.length - 1);
+    return normalized;
+  }
+}
+
+class _ProvisionResult {
+  final bool success;
+  final String message;
+
+  const _ProvisionResult(this.success, this.message);
+}
+
 class ConnectionSuccessScreen extends StatelessWidget {
   const ConnectionSuccessScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final channelName = ModalRoute.of(context)?.settings.arguments as String? ?? 'Migro_CH1';
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
         child: Stack(children: [
           Column(children: [
             const Spacer(),
-            const Text('Migro_CH1', style: TextStyle(color: AppColors.primaryMid, fontSize: 22, fontWeight: FontWeight.w700)),
+            Text(channelName, style: const TextStyle(color: AppColors.primaryMid, fontSize: 22, fontWeight: FontWeight.w700)),
             const SizedBox(height: 24),
             Container(height: 180, width: 180, decoration: BoxDecoration(color: const Color(0xFFF0F0F0), borderRadius: BorderRadius.circular(16)), child: const Icon(Icons.electrical_services, size: 80, color: Color(0xFF888888))),
             const SizedBox(height: 32),
@@ -443,11 +803,12 @@ class ConnectionFailedScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final channelName = ModalRoute.of(context)?.settings.arguments as String? ?? 'Migro_CH1';
     return Scaffold(
       backgroundColor: AppColors.background,
       body: Center(
         child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-          const Text('Migro_CH1', style: TextStyle(color: AppColors.primaryMid, fontSize: 22, fontWeight: FontWeight.w700)),
+          Text(channelName, style: const TextStyle(color: AppColors.primaryMid, fontSize: 22, fontWeight: FontWeight.w700)),
           const SizedBox(height: 24),
           Container(height: 180, width: 180, decoration: BoxDecoration(color: const Color(0xFFF0F0F0), borderRadius: BorderRadius.circular(16)), child: const Icon(Icons.electrical_services, size: 80, color: Color(0xFF888888))),
           const SizedBox(height: 32),
